@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lvmama.bms.pusher.store.mysql.mapper.MsgPusherMapper">
+
+	<select id="getAllMsgPusher" resultType="com.lvmama.bms.pusher.store.domain.MsgPusherPO">
+		SELECT * FROM tnt_bms_msg_pusher
+	</select>
+
+	<insert id="saveMsgPusher" parameterType="com.lvmama.bms.pusher.store.domain.MsgPusherPO">
+		  INSERT INTO tnt_bms_msg_pusher
+		  (name, jar, version)
+		  VALUES
+		  (#{name}, #{jar}, #{version})
+	</insert>
+
+	<select id="getMsgPusherById" resultType="com.lvmama.bms.pusher.store.domain.MsgPusherPO">
+		SELECT * FROM tnt_bms_msg_pusher
+		WHERE id = #{id}
+	</select>
+
+</mapper>

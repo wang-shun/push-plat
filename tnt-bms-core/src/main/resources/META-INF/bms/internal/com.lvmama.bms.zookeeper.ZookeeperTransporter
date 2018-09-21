@@ -1,0 +1,3 @@
+zkclient=com.lvmama.bms.zookeeper.zkclient.ZkClientZookeeperTransporter
+curator=com.lvmama.bms.zookeeper.curator.CuratorZookeeperTransporter
+lts=com.lvmama.bms.zookeeper.lts.LtsZookeeperTransporter

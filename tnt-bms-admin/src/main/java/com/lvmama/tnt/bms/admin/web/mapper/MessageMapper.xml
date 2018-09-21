@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lvmama.tnt.bms.admin.web.mapper.MessageMapper">
+
+    <select id="checkMessageByMsgId" resultType="java.lang.Integer">
+        SELECT count(id) FROM `tnt_bms_msg_${typeId}` WHERE msg_id=#{msgId}
+    </select>
+
+    <select id="checkFailureByMsgId" resultType="java.lang.Integer">
+        SELECT count(id) FROM tnt_bms_push_failure where msg_id = #{msgId}
+    </select>
+
+    <delete id="deleteMessageToken" >
+        delete from `tnt_bms_msg_token_${typeId}`
+        WHERE token_id in
+        <foreach collection="tokenIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

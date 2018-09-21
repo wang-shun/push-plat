@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lvmama.tnt.bms.admin.web.mapper.ConvertMapper">
+
+    <resultMap id="BaseResultMap" type="com.lvmama.tnt.bms.admin.web.domain.po.ConvertDO">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="generation" property="generation"/>
+        <result column="request_map" property="requestMap"/>
+        <result column="response_map" property="responseMap"/>
+        <result column="http_header" property="httpHeader"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <select id="findByID" resultMap="BaseResultMap">
+        select
+        id,
+        `name`,
+        generation,
+        request_map,
+        response_map,
+        http_header,
+        version
+        from tnt_bms_convert_map where id = #{id}
+    </select>
+
+    <select id="totalCount" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.ConvertDO" resultType="java.lang.Long">
+        select count(*) from tnt_bms_convert_map
+        <where>
+            <if test="name != null and name != ''">
+                and `name` like concat('%',concat(#{name},'%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="findByPage" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.ConvertDO" resultMap="BaseResultMap">
+        select id,`name`,generation,request_map,response_map,http_header,version from tnt_bms_convert_map
+        <where>
+            <if test="name != null and name != ''">
+                and `name` like concat('%',concat(#{name},'%'))
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="findByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select id,`name`,generation,request_map,response_map,http_header,version from tnt_bms_convert_map
+        where `name` like concat('%',concat(#{name},'%'))
+        order by id desc
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select id,`name` from tnt_bms_convert_map order by id desc
+    </select>
+
+    <select id="existName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(*) from tnt_bms_convert_map where `name` = #{name}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.ConvertDO">
+        insert into tnt_bms_convert_map(`name`,generation,request_map,response_map,http_header,version)
+        values(#{name},#{generation},#{requestMap},#{responseMap},#{httpHeader},#{version})
+    </insert>
+
+    <update id="update" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.ConvertDO">
+        update tnt_bms_convert_map
+        <set>
+            <if test="name != null and name != ''">
+                `name` = #{name},
+            </if>
+            <if test="generation != null and generation != ''">
+                generation = #{generation},
+            </if>
+            <if test="requestMap != null and requestMap != ''">
+                request_map = #{requestMap},
+            </if>
+            <if test="responseMap != null">
+                response_map = #{responseMap},
+            </if>
+            <if test="httpHeader != null">
+                http_header = #{httpHeader},
+            </if>
+            <if test="version != null">
+                version = #{version},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Integer">
+        delete from tnt_bms_convert_map where id = #{id}
+    </delete>
+
+    <delete id="deleteByName" parameterType="java.lang.String">
+        delete from tnt_bms_convert_map where  `name` = #{name}
+    </delete>
+
+    <select id="dataVersion" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select version from tnt_bms_convert_map where  `name` = #{name}
+    </select>
+</mapper>

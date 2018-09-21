@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>分销推送平台</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+    <link th:href="@{/css/animate.css}" rel="stylesheet" />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+    <link th:href="@{/css/plugins/chartist/chartist.min.css}" rel="stylesheet" />
+
+    <!-- Mainly scripts -->
+    <script th:src="@{/js/jquery-2.1.1.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+    <script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+
+    <!-- Flot -->
+    <script th:src="@{/js/plugins/flot/jquery.flot.js}"></script>
+    <script th:src="@{/js/plugins/flot/jquery.flot.tooltip.min.js}"></script>
+    <script th:src="@{/js/plugins/flot/jquery.flot.resize.js}"></script>
+    <script th:src="@{/js/plugins/flot/jquery.flot.pie.js}"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script th:src="@{/js/inspinia.js}"></script>
+    <script th:src="@{/js/plugins/pace/pace.min.js}"></script>
+
+    <!-- ChartJS-->
+    <script th:src="@{/js/plugins/chartJs/Chart.min.js}"></script>
+    <script th:src="@{/js/plugins/sweetalert/sweetalert.min.js}"></script>
+    <link th:href="@{/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet" type="text/css" />
+
+    <!-- common -->
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/bms-util.js}"></script>
+    <script th:src="@{/js/datepicker/WdatePicker.js}"></script>
+    <script th:src="@{/js/newsEarlyWarning.js}"></script>
+    <script th:src="@{/js/plugins/highcharts/highcharts-4.1.8.js}"></script>
+
+</head>
+
+<body>
+<div id="wrapper">
+    <nav class="navbar-default navbar-static-side" role="navigation" th:include="nav :: navigation"></nav>
+
+    <div id="page-wrapper" class="gray-bg">
+        <div class="border-bottom" th:include="header :: headerTop"></div>
+        <div class="row wrapper border-bottom white-bg page-heading" th:fragment="headerNav">
+            <div class="col-lg-10">
+                <h2>接收方消息统计</h2>
+                <ol class="breadcrumb">
+                    <li>
+                        <a th:href="@{/main/dashboard}">首页</a>
+                    </li>
+                    <li>
+                        <a>监控管理</a>
+                    </li>
+                    <li class="active">
+                        <strong>接收方消息统计</strong>
+                    </li>
+                </ol>
+            </div>
+            <div class="col-lg-2">
+            </div>
+        </div>
+
+        <div class="wrapper wrapper-content animated fadeInRight">
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5>搜索&amp;操作</h5>
+                            <div class="ibox-tools">
+                                <a class="collapse-link">
+                                    <i class="fa fa-chevron-up"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="ibox-content" style="display: block;">
+                            <form method="post" id="searchForm">
+                                <div class="row">
+                                    <div class="col-sm-3 m-b-xs">
+                                        <input id="token" th:value="${requestVo.token}"  placeholder="接收方TOKEN" class="form-control" type="text" />
+                                    </div>
+                                    <div class="col-sm-2 m-b-xs">
+                                        <input class="form-control datepicker" type="text" style="width: 205px;"
+                                               id="startTime"
+                                               name="startTime"
+                                               th:value="${requestVo.startTime}"
+                                               date-format="yyyy-MM-dd HH:mm:ss"
+                                               placeholder="开始时间"/>
+                                    </div>
+                                    <div class="col-sm-2 m-b-xs">
+                                        <input class="form-control datepicker" type="text" style="width: 205px;"
+                                               id="endTime"
+                                               name="endTime"
+                                               th:value="${requestVo.endTime}"
+                                               date-format="yyyy-MM-dd HH:mm:ss"
+                                               placeholder="结束时间"/>
+                                    </div>
+                                    <div class="col-sm-2 m-b-xs">
+                                        <button id="searchBtn" class="btn btn-primary btn-block" type="button"><i class="fa fa-search"></i>&nbsp;&nbsp;&nbsp;&nbsp;<strong>搜索</strong></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox">
+                        <div class="ibox-title">
+                            <h5><span class="text-navy">接收方消息统计</span> </h5>
+
+                            <div class="ibox-tools"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></div>
+                        </div>
+                        <div class="ibox-content">
+                            <div>
+                                <div id="highcharts" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="footer" th:include="footer :: copyright"></div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+
+</script>
+
+</body>
+
+</html>

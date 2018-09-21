@@ -1,0 +1,2 @@
+mysql=com.lvmama.bms.store.jdbc.datasource.MysqlDataSourceProvider
+h2=com.lvmama.bms.store.jdbc.datasource.H2DataSourceProvider

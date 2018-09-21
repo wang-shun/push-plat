@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>分销推送平台</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+    <link th:href="@{/css/animate.css}" rel="stylesheet" />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+    <link th:href="@{/css/plugins/chartist/chartist.min.css}" rel="stylesheet" />
+
+    <!-- Mainly scripts -->
+    <script th:src="@{/js/jquery-2.1.1.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+    <script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+
+    <!-- Flot -->
+    <script th:src="@{/js/plugins/flot/jquery.flot.js}"></script>
+    <script th:src="@{/js/plugins/flot/jquery.flot.tooltip.min.js}"></script>
+    <script th:src="@{/js/plugins/flot/jquery.flot.resize.js}"></script>
+    <script th:src="@{/js/plugins/flot/jquery.flot.pie.js}"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script th:src="@{/js/inspinia.js}"></script>
+    <script th:src="@{/js/plugins/pace/pace.min.js}"></script>
+
+    <!-- ChartJS-->
+    <script th:src="@{/js/plugins/chartJs/Chart.min.js}"></script>
+    <!--<script th:src="@{/js/demo/chartjs-demo.js}"></script>-->
+
+    <!-- common -->
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/bms-util.js}"></script>
+    <script th:src="@{/js/datepicker/WdatePicker.js}"></script>
+
+</head>
+
+<body>
+    <div id="wrapper">
+        <nav class="navbar-default navbar-static-side" role="navigation" th:include="nav :: navigation"></nav>
+
+        <div id="page-wrapper" class="gray-bg">
+            <div class="border-bottom" th:include="header :: headerTop"></div>
+                <div class="row wrapper border-bottom white-bg page-heading" th:fragment="headerNav">
+                    <div class="col-lg-10">
+                            <h2>消息类型推送统计</h2>
+                        <ol class="breadcrumb">
+                            <li>
+                                <a th:href="@{/main/dashboard}">首页</a>
+                            </li>
+                            <li>
+                                <a>统计分析</a>
+                            </li>
+                            <li class="active">
+                                <strong>消息类型推送统计</strong>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="col-lg-2">
+                    </div>
+                </div>
+
+                <div class="wrapper wrapper-content animated fadeInRight">
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="ibox float-e-margins">
+                                <div class="ibox-title">
+                                    <h5>搜索&amp;操作</h5>
+                                    <div class="ibox-tools">
+                                        <a class="collapse-link">
+                                            <i class="fa fa-chevron-up"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="ibox-content" style="display: block;">
+                                    <form method="post" id="searchForm">
+                                        <div class="row">
+                                            <div class="col-sm-2 m-b-xs">
+                                                <select name="type" th:value="${requestVo.msgType}" id="msgType" class="form-control" >
+                                                    <option value="">--请选择消息类型--</option>
+                                                    <option th:each="nc : ${typeList}" th:value="${nc}" th:text="${nc}">分类</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-2 m-b-xs">
+                                                <input class="form-control datepicker" type="text" style="width: 205px;"
+                                                       id="startTime"
+                                                       name="startTime"
+                                                       th:value="${requestVo.startTime}"
+                                                       date-format="yyyy-MM-dd HH:mm:ss"
+                                                       placeholder="开始时间"/>
+                                            </div>
+                                            <div class="col-sm-2 m-b-xs">
+                                                <input class="form-control datepicker" type="text" style="width: 205px;"
+                                                       id="endTime"
+                                                       name="endTime"
+                                                       th:value="${requestVo.endTime}"
+                                                       date-format="yyyy-MM-dd HH:mm:ss"
+                                                       placeholder="结束时间"/>
+                                            </div>
+                                            <div class="col-sm-2 m-b-xs">
+                                                <button id="searchBtn" class="btn btn-primary btn-block" type="button"><i class="fa fa-search"></i>&nbsp;&nbsp;&nbsp;&nbsp;<strong>搜索</strong></button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" >
+                        <div class="col-lg-12" >
+                            <div class="ibox float-e-margins" >
+                                <div class="ibox-title">
+                                    <h5>Type Line Chart
+                                        <small></small>
+                                    </h5>
+                                    <div class="ibox-tools">
+                                       <!--<div class="legend">
+                                            <div style="position: absolute; width: 60px; height: 68px; top: 5px; right: 5px; background-color: rgb(255, 255, 255); opacity: 0.85;"> </div>
+                                            <table style="position:absolute;top:5px;right:5px;;font-size:smaller;color:#545454">
+                                                <tbody>
+                                                    <tr><td class="legendColorBox"><div style="border:1px solid rgb(255,0,0);padding:1px"><div style="width:4px;height:0;border:5px solid rgb(255,0,0);overflow:hidden"></div></div></td><td class="legendLabel">到达量</td></tr>
+                                                    <tr><td class="legendColorBox"><div style="border:1px solid rgb(26,179,148);padding:1px"><div style="width:4px;height:0;border:5px solid rgb(26,179,148);overflow:hidden"></div></div></td><td class="legendLabel">接收量</td></tr>
+                                                    <tr><td class="legendColorBox"><div style="border:1px solid rgb(50,0,110);padding:1px"><div style="width:4px;height:0;border:5px solid rgb(50,0,110);overflow:hidden"></div></div></td><td class="legendLabel">失败量</td></tr>
+                                                    <tr><td class="legendColorBox"><div style="border:1px solid rgb(50,0,255);padding:1px"><div style="width:4px;height:0;border:5px solid rgb(50,0,255);overflow:hidden"></div></div></td><td class="legendLabel">发送量</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>-->
+                                    </div>
+                                </div>
+                                <div id="char-contect" class="ibox-content">
+                                    <div >
+                                        <div id="highcharts" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                                        <!--<canvas id="lineChart" style="height:500px;"></canvas>-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer" th:include="footer :: copyright"></div>
+            </div>
+        </div>
+    <script th:src="@{/js/plugins/sweetalert/sweetalert.min.js}"></script>
+    <link th:href="@{/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet" type="text/css" />
+    <script th:src="@{/js/plugins/highcharts/highcharts-4.1.8.js}"></script>
+    <script th:src="@{/js/newsTypeChart.js}"></script>
+    <script>
+       /* var labels,reachCounts,receiveCounts,failCounts,sendCounts;
+        var allMap = new Map();
+        $(document).ready(function (){
+            $(document).on("click", "#search", function () {
+                queryShowData();
+            });
+            queryShowData();
+            $(document).on("focus", ".datepicker", function () {
+                WdatePicker({
+                    el: $(this).attr("id"),
+                    dateFmt: $(this).attr("date-format"),
+                    lang: 'zh-cn',
+                    qsEnabled: false
+                })
+            });
+        });
+
+        function queryShowData() {
+            var requestVo = {
+                msgType : $("#msgType").val(),
+                startTime : $("#startTime").val(),
+                endTime : $("#endTime").val()
+            };
+            bms.requestAjaxPost("getData",JSON.stringify(requestVo),
+                function(response){
+                    labels = response.result.labels;
+                    if (labels.length == 0) {
+                        $("#char-contect").html("<h4>查无数据</h4>");
+                    } else {
+                        if ($("#char-contect div")){
+                            $("#char-contect").html('<div ><canvas id="lineChart" style="height:500px;"></canvas></div>');
+                        }
+
+                        allMap = response.result.datasetsMap;
+                        reachCounts = allMap["reachCounts"];
+                        receiveCounts = allMap["receiveCounts"];
+                        failCounts = allMap["failCounts"];
+                        sendCounts = allMap["sendCounts"];
+                        showChart(labels,reachCounts,receiveCounts,failCounts,sendCounts);
+                    }
+                },function(response){
+                    swal(response.resMsg);
+                });
+        }
+
+        function showChart(labels,reachCounts,receiveCounts,failCounts,sendCounts) {
+            var lineData = {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "到达量",
+                        fillColor: "rgba(255,0,0,0.1)",
+                        strokeColor: "rgba(255,0,0,1)",
+                        pointColor: "rgba(255,0,0,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(255,0,0,1)",
+                        data: reachCounts
+                    },
+                    {
+                        label: "接收量",
+                        fillColor: "rgba(26,179,148,0.1)",
+                        strokeColor: "rgba(26,179,148,0.7)",
+                        pointColor: "rgba(26,179,148,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(26,179,148,1)",
+                        data: receiveCounts
+                    },
+                    {
+                        label: "失败量",
+                        fillColor: "rgba(50,0,110,0.1)",
+                        strokeColor: "rgba(50,0,110,0.5)",
+                        pointColor: "rgba(50,0,110,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(50,0,110,1)",
+                        data: failCounts
+                    },
+                    {
+                        label: "发送量",
+                        fillColor: "rgba(50,0,255,0.1)",
+                        strokeColor: "rgba(50,0,255,0.5)",
+                        pointColor: "rgba(50,0,255,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(50,0,255,1)",
+                        data: sendCounts
+                    }
+                ]
+            };
+
+            var lineOptions = {
+                scaleShowGridLines: true,
+                scaleGridLineColor: "rgba(0,0,0,.05)",
+                scaleGridLineWidth: 1,
+                bezierCurve: true,
+                bezierCurveTension: 0.4,
+                pointDot: true,
+                pointDotRadius: 3,
+                pointDotStrokeWidth: 1,
+                pointHitDetectionRadius: 10,
+                datasetStroke: false,
+                datasetStrokeWidth: 1,
+                datasetFill: true,
+                responsive: true,
+            };
+
+            var ctx = document.getElementById("lineChart").getContext("2d");
+            var myNewChart = new Chart(ctx).Line(lineData, lineOptions);
+            document.getElementById("lineChart").style.height = "500px";
+        }*/
+    </script>
+
+</body>
+
+</html>

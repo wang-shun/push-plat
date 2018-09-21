@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>分销推送平台</title>
+
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+
+    <link th:href="@{/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
+    <link th:href="@{/css/plugins/footable/footable.core.css}" rel="stylesheet"/>
+
+</head>
+
+<body>
+
+<div id="wrapper">
+    <nav class="navbar-default navbar-static-side" role="navigation" th:include="nav :: navigation"></nav>
+    <div id="page-wrapper" class="gray-bg">
+        <div class="border-bottom" th:include="header :: headerTop"></div>
+        <div class="row wrapper border-bottom white-bg page-heading" th:fragment="headerNav">
+            <div class="col-lg-10">
+                <h2>日志查看</h2>
+                <ol class="breadcrumb">
+                    <li>
+                        <a th:href="@{/main/dashboard}">首页</a>
+                    </li>
+                    <li>
+                        <a>监控管理</a>
+                    </li>
+                    <li class="active">
+                        <strong>日志查看</strong>
+                    </li>
+                </ol>
+            </div>
+            <div class="col-lg-2">
+            </div>
+        </div>
+
+        <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5>搜索&amp;操作</h5>
+                            <div class="ibox-tools">
+                                <a class="collapse-link">
+                                    <i class="fa fa-chevron-up"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="ibox-content" style="display: block;">
+                            <el-row>
+                                <el-form :inline="true" size="small" :model="searchForm" class="demo-form-inline">
+                                    <el-form-item label="业务ID">
+                                        <el-input v-model="searchForm.msgId" placeholder="业务ID"></el-input>
+                                    </el-form-item>
+                                 <!--   <el-form-item label="TOKEN">
+                                        <el-input v-model="searchForm.token" placeholder="TOKEN"></el-input>
+                                    </el-form-item>-->
+                                    <el-form-item label="接收方名称">
+                                        <el-select
+                                                v-model="searchForm.token"
+                                                filterable="true"
+                                                remote="true"
+                                                clearable="true"
+                                                reserve-keyword="true"
+                                                placeholder="请输入关键词"
+                                                :remote-method="searchAccess">
+                                            <el-option
+                                                    v-for="item in accessData"
+                                                    :key="item.id"
+                                                    :label="item.name"
+                                                    :value="item.token">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="推送状态">
+                                        <el-select v-model="searchForm.pushStatus" placeholder="推送状态">
+                                            <el-option label="--全部--" value=""></el-option>
+                                            <el-option label="成功" value="success"></el-option>
+                                            <el-option label="失败" value="fail"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="消息类型">
+                                        <el-select v-model="searchForm.msgType" filterable="true" placeholder="消息类型">
+                                            <el-option label="--全部--" value=""></el-option>
+                                            <el-option v-for="item in msgTypes" :label="item.type" :value="item.type" :key="item.id"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="时间" style="">
+                                        <div class="block">
+                                            <el-date-picker
+                                                    v-model="searchForm.queryTime"
+                                                    type="datetimerange"
+                                                    align="right"
+                                                    format="yyyy-MM-dd HH:mm:ss"
+                                                    start-placeholder="开始日期"
+                                                    end-placeholder="结束日期"
+                                                    :default-time="['00:00:00', '23:59:59']"
+                                                    >
+                                            </el-date-picker>
+                                        </div>
+                                    </el-form-item>
+                                    <el-form-item>
+                                        <el-button type="primary" icon="search" v-on:click="search" style="background-color: #18a689">查询</el-button>
+                                    </el-form-item>
+                                </el-form>
+                            </el-row>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <!--列表-->
+                    <el-row>
+                        <el-table
+                                :data="tableData"
+                                border="true"
+                                style="width: 100%">
+                            <el-table-column
+                                    prop="msgId"
+                                    label="业务ID"
+                                    width="120">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="msgType"
+                                    label="推送类型"
+                                    width="200">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="token"
+                                    label="TOKEN"
+                                    width="300">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="distributeName"
+                                    label="接收方名称"
+                                    width="350">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="responseStatus"
+                                    label="状态码"
+                                    width="80">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="pushStatus"
+                                    label="推送状态"
+                                    width="100">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="pushTimeCost"
+                                    label="推送耗时"
+                                    width="80">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="retryCount"
+                                    label="重试次数"
+                                    width="80">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="receiveTime"
+                                    label="接收时间"
+                                    width="200">
+                            </el-table-column>
+                    <!--        <el-table-column
+                                    prop="requestBody"
+                                    label="推送报文"
+                                    width="400">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="responseBody"
+                                    label="响应报文"
+                                    width="400">
+                            </el-table-column>-->
+                            <el-table-column
+                                    label="操作">
+                                <template scope="scope">
+                                    <el-button :plain="true" type="success" size="small" icon="edit" v-on:click="editClick(scope.row)">查看详情</el-button>
+                                    <!--<el-button :plain="true" type="danger" size="small" icon="delete" v-on:click="retryClick(scope.row)">重试</el-button>-->
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-row>
+                    <!--列表底部工具条和分页符-->
+                    <el-row style="margin-top: 20px" type="flex" justify="end">
+                        <el-col :span="18" >
+                            <el-pagination
+                                    v-on:size-change="pageSizeChange"
+                                    v-on:current-change="currentPageChange"
+                                    :current-page="currentPage"
+                                    :page-sizes="[10, 20, 30, 50]"
+                                    :page-size="pageSize"
+                                    layout="total, sizes, prev, pager, next, jumper"
+                                    :total="totalCount">
+                            </el-pagination>
+                        </el-col>
+                    </el-row>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <el-dialog
+                    title="日志详情"
+                    :visible.sync="dialogVisible"
+                    width="50%"
+                    center="true">
+                <el-form label-position="right" label-width="80px" :model="logVO">
+                    <el-form-item label="请求参数">
+                        <el-input type="textarea" autosize="true" v-model="logVO.requestBody"></el-input>
+                    </el-form-item>
+                    <el-form-item label="响应参数">
+                        <el-input type="textarea" autosize="true" v-model="logVO.responseContent"></el-input>
+                    </el-form-item>
+                    <el-form-item label="消息内容">
+                        <el-input type="textarea" autosize="true" v-model="logVO.msgContent"></el-input>
+                    </el-form-item>
+                    <el-form-item label="消息头">
+                        <el-input type="textarea" autosize="true" v-model="logVO.requestHeader"></el-input>
+                    </el-form-item>
+                    <el-form-item label="异常堆栈">
+                        <el-input type="textarea" autosize="true" v-model="logVO.exception"></el-input>
+                    </el-form-item>
+                </el-form>
+                <span slot="footer" class="dialog-footer">
+                    <el-button type="primary" v-on:click="dialogVisible = false" style="background-color: #18a689">确 定</el-button>
+                  </span>
+            </el-dialog>
+        </div>
+        <div class="footer" th:include="footer :: copyright"></div>
+    </div>
+</div>
+
+<!-- Mainly scripts -->
+<script th:src="@{/js/jquery-2.1.1.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+<script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+
+<!-- Custom and plugin javascript -->
+<script th:src="@{/js/inspinia.js}"></script>
+<script th:src="@{/js/plugins/pace/pace.min.js}"></script>
+<script th:src="@{/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<link th:href="@{/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet" type="text/css" />
+<script th:src="@{/js/plugins/vue/vue.min.js}"></script>
+<script th:src="@{/js/plugins/axios/axios.min.js}"></script>
+<script th:src="@{/js/plugins/elementui/index.js}"></script>
+<link th:href="@{/css/plugins/elementui/index.css}" rel="stylesheet" type="text/css" />
+
+<!-- common -->
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/bms-util.js}"></script>
+<script th:src="@{/js/tool/index.js}"></script>
+
+<script th:inline="javascript">
+
+    var vue = new Vue({
+        el: "#wrapper",
+        data: {
+            totalCount: 0,
+            currentPage: 0,
+            pageSize: 10,
+            msgTypes: [],
+            accessData: [],
+            tableData: null,
+            searchToken: "",
+            searchForm:{
+                pageNo: null,
+                pageSize: null,
+                msgId: "",
+                token: "",
+                msgType: "",
+                pushStatus: "",
+                queryTime: []
+            },
+            dialogVisible: false,
+            logVO: {
+                requestHeader: '',
+                requestBody: '',
+                responseContent: ''
+            },
+        },
+        methods: {
+            setDefaultDate: function () {
+                var start = new Date(new Date().getTime() - 1 * 60 * 60 * 1000).Format("yyyy-MM-dd hh:mm:ss");
+                var now = new Date().Format("yyyy-MM-dd hh:mm:ss");
+                this.searchForm.queryTime.push(start);
+                this.searchForm.queryTime.push(now);
+            },
+            search : function () {
+                var self = this;
+                var url = "/tnt-bms-admin/logger/query";
+                this.searchForm.pageNo = this.currentPage == 0?1:this.currentPage;
+                this.searchForm.pageSize = this.pageSize;
+                axios.post(url, this.searchForm).then(function (response) {
+                    if (response.data.success) {
+                        self.tableData = response.data.result;
+                        self.totalCount = response.data.totalCount;
+                    } else {
+                        self.tableData = null;
+                        self.totalCount = 0;
+                        self.currentPage = 1;
+                        self.$alert(response.data.resMsg, '消息提示', {
+                            confirmButtonText: '确定',
+                            callback: null
+                        });
+                    }
+                }).catch(function (error) {
+                    self.totalCount = 0;
+                    console.log(error);
+                });
+            },
+            editClick: function (row) {
+                var id = row.id;
+                var self = this;
+                var url = "/tnt-bms-admin/logger/queryById";
+                axios.get(url,{
+                    params: {
+                        id: id
+                    }
+                }).then(function (response) {
+                    if (response.data.success) {
+                        self.logVO = response.data.result;
+                        self.dialogVisible = true;
+                    } else {
+                        sweetAlert(response.data.resMsg, "", "error");
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            retryClick: function (row) {
+
+            },
+            searchAccess: function (query) {
+                var self = this;
+                var url = "/tnt-bms-admin/logger/access";
+                axios.get(url,{
+                        params: {
+                            keyword: query
+                        }
+                    }).then(function (response) {
+                    if (response.data.success) {
+                        self.accessData = response.data.result;
+                    } else {
+                        sweetAlert(response.data.resMsg, "", "error");
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            loadMsgTypes: function () {
+                var self = this;
+                var url = "/tnt-bms-admin/logger/types";
+                axios.get(url).then(function (response) {
+                    if (response.data.success) {
+                        self.msgTypes = response.data.result;
+                    } else {
+                        sweetAlert(response.data.resMsg, "", "error");
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            //分页大小修改事件
+            pageSizeChange:function(val) {
+                this.pageSize = val;
+                var _self = this;
+                _self.search();//重新加载数据
+            },
+            //当前页修改事件
+            currentPageChange:function(val) {
+                this.currentPage = val;
+                var _self = this;
+                _self.search();//重新加载数据
+            },
+        },
+        mounted: function () {
+            this.loadMsgTypes();
+            this.setDefaultDate();
+        }
+    });
+</script>
+
+</body>
+
+</html>

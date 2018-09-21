@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lvmama.tnt.bms.admin.web.mapper.NewsSendSpeedMapper">
+    <resultMap id="BaseResultMap" type="com.lvmama.tnt.bms.admin.web.domain.po.NewsSendSpeedDO">
+        <id column="id" property="id"/>
+        <result column="msg_id" property="msgId"/>
+        <result column="msg_type_id" property="msgTypeId"/>
+        <result column="reach_count" property="reachCount"/>
+        <result column="send_count" property="sendCount"/>
+        <result column="fail_count" property="failCount"/>
+        <result column="msgType" property="msgType"/>
+        <result column="businessMsgID" property="businessMsgID"/>
+        <result column="receive_time" property="receiveTime"/>
+    </resultMap>
+
+    <resultMap id="SpeedDetailMap" type="com.lvmama.tnt.bms.admin.web.domain.vo.NewsSpeedDetailVO">
+        <result column="msg_id" property="msgId"/>
+        <result column="businessMsgID" property="businessMsgID"/>
+        <result column="msg_status" property="status"/>
+        <result column="token" property="token"/>
+        <result column="name" property="name"/>
+        <result column="push_type" property="pushType"/>
+        <result column="push_url" property="pushUrl"/>
+        <result column="create_time" property="receiveTime"/>
+        <result column="modify_time" property="pushTime"/>
+    </resultMap>
+
+    <select id="findMsgInfo" resultType="com.lvmama.tnt.bms.admin.web.domain.po.MessageDO">
+        select id,msg_id as msgId,receive_time receiveTime from `tnt_bms_msg_${typeID}`
+        where id = #{msgID}
+    </select>
+
+    <select id="findMessageID" resultType="java.lang.String">
+        select id from `tnt_bms_msg_${typeID}` where msg_id = #{msgID}
+    </select>
+
+    <select id="totalSpeedDetailCount" resultType="java.lang.Long">
+        select count(*)
+        FROM
+        tnt_bms_news_send_speed s
+        LEFT JOIN	`tnt_bms_msg_${typeID}` m on s.msg_id = m.id
+        LEFT JOIN `tnt_bms_msg_token_${typeID}` t on m.id = t.msg_id
+        LEFT JOIN tnt_bms_news_access cs on t.token = cs.token
+        <where>
+            <if test="msgId != null and msgId != ''">
+                and t.msg_id = #{msgId}
+            </if>
+            <if test="distributorName != null and distributorName != ''">
+                and cs.`name` like CONCAT('%',#{distributorName},'%')
+            </if>
+            <if test="status != null">
+                and t.`status` = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="findSpeedDetailByPage" resultMap="SpeedDetailMap">
+        SELECT
+            s.msg_id,
+            m.msg_id AS businessMsgID,
+            t.`status` as msg_status,
+            t.create_time,
+            cs.token,
+            cs.`name`,
+            -- cs.push_type,
+            t.modify_time,
+            cs.push_url
+        FROM
+        tnt_bms_news_send_speed s
+        LEFT JOIN	`tnt_bms_msg_${typeID}` m on s.msg_id = m.id
+        LEFT JOIN `tnt_bms_msg_token_${typeID}` t on m.id = t.msg_id
+        LEFT JOIN tnt_bms_news_access cs on t.token = cs.token
+        <where>
+            <if test="msgId != null and msgId != ''">
+                and t.msg_id = #{msgId}
+            </if>
+            <if test="distributorName != null and distributorName != ''">
+                and cs.`name` like CONCAT('%',#{distributorName},'%')
+            </if>
+            <if test="status != null">
+                and t.`status` = #{status}
+            </if>
+        </where>
+        ORDER BY t.create_time DESC
+    </select>
+
+    <sql id="all_column">
+        id,msg_id,msg_type_id,reach_count,send_count,fail_count
+    </sql>
+    <select id="totalCount" resultType="java.lang.Long">
+        select count(*)
+        from tnt_bms_news_send_speed
+        <where>
+            <if test="msgId != null">
+                and msg_id in
+                <foreach collection="msgId" open="(" separator="," close=")" item="id">
+                  #{id}
+                </foreach>
+            </if>
+            <if test="startTime != null">
+                and `timestamp` <![CDATA[ > ]]> #{startTime}
+            </if>
+            <if test="endTime != null">
+                and `timestamp` <![CDATA[ < ]]> #{endTime}
+            </if>
+        </where>
+    </select>
+    <select id="findByPage" resultMap="BaseResultMap">
+        select
+        s.id,s.msg_id,s.msg_type_id,s.reach_count,s.send_count,s.fail_count,t.type as msgType
+        from tnt_bms_news_send_speed s
+        left join tnt_bms_news_type t
+        on s.msg_type_id = t.id
+        <where>
+            <if test="msgTypeID != null">
+                t.id = #{msgTypeID}
+            </if>
+            <if test="msgId != null">
+                and s.msg_id in
+                <foreach collection="msgId" open="(" separator="," close=")" item="id">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="startTime != null">
+                and s.`timestamp` <![CDATA[ > ]]> #{startTime}
+            </if>
+            <if test="endTime != null">
+                and s.`timestamp` <![CDATA[ < ]]> #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsSendSpeedDO">
+        insert into tnt_bms_news_send_speed(msg_id,msg_type_id,reach_count,send_count,fail_count,`timestamp`)
+        values(#{msgId},#{msgTypeId},#{reachCount},#{sendCount},#{failCount},#{timestamp})
+    </insert>
+
+    <update id="update" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsSendSpeedDO">
+        update tnt_bms_news_send_speed
+        <set>
+            <if test="msgId != null ">
+                msg_id = #{msgId},
+            </if>
+            <if test="msgTypeId != null ">
+                msg_type_id = #{msgTypeId},
+            </if>
+            <if test="reachCount != null ">
+                reach_count = #{reachCount},
+            </if>
+            <if test="sendCount != null ">
+                send_count = #{sendCount},
+            </if>
+            <if test="failCount != null ">
+                fail_count = #{failCount},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Long">
+        delete from tnt_bms_news_send_speed where id = #{id}
+    </delete>
+</mapper>

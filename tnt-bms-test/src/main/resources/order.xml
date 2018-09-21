@@ -1,0 +1,32 @@
+<mapping>
+<type name="order">
+    <bind name="order"/>
+    <prop name="orderId">
+        <bind name="orderId"/>
+    </prop>
+    <prop name="amount">
+        <bind name="amount"/>
+    </prop>
+    <prop name="status">
+        <bind name="status"/>
+    </prop>
+    <prop name="product">
+        <bind name="product"/>
+    </prop>
+    <prop name="channel">
+        <bind name="channel"/>
+    </prop>
+    <prop name="payway">
+        <bind name="payway"/>
+    </prop>
+    <prop name="company">
+        <bind name="company"/>
+    </prop>
+    <prop name="visitor">
+        <bind name="visitor"/>
+    </prop>
+    <prop name="createUser">
+        <bind name="createUser"/>
+    </prop>
+</type>
+</mapping>

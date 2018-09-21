@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>分销推送平台</title>
+
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+
+    <link th:href="@{/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
+    <link th:href="@{/css/plugins/footable/footable.core.css}" rel="stylesheet"/>
+
+</head>
+
+<body>
+
+<div id="wrapper">
+    <nav class="navbar-default navbar-static-side" role="navigation" th:include="nav :: navigation"></nav>
+    <div id="page-wrapper" class="gray-bg">
+        <div class="border-bottom" th:include="header :: headerTop"></div>
+        <div class="row wrapper border-bottom white-bg page-heading" th:fragment="headerNav">
+            <div class="col-lg-10">
+                <h2>推送器管理</h2>
+                <ol class="breadcrumb">
+                    <li>
+                        <a th:href="@{/main/dashboard}">首页</a>
+                    </li>
+                    <li>
+                        <a>配置管理</a>
+                    </li>
+                    <li class="active">
+                        <strong>推送器管理</strong>
+                    </li>
+                </ol>
+            </div>
+            <div class="col-lg-2">
+            </div>
+        </div>
+
+        <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5>搜索&amp;操作</h5>
+                            <div class="ibox-tools">
+                                <a class="collapse-link">
+                                    <i class="fa fa-chevron-up"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="ibox-content" style="display: block;">
+                            <form th:action="@{/config/pusher/list}" th:object="${msgPusherDO}" method="post" id="searchForm">
+                                <div class="row">
+                                    <div class="col-sm-3 m-b-xs">
+                                        <input id="title" th:field="*{name}"  placeholder="推送器名称" class="form-control" type="text" />
+                                    </div>
+                                    <div class="col-sm-2 m-b-xs">
+                                        <button class="btn btn-primary btn-block" type="submit"><i class="fa fa-search"></i>&nbsp;&nbsp;&nbsp;&nbsp;<strong>搜索</strong></button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="row">
+                                <div class="col-sm-2 m-b-xs" th:if="${session.SESSION_AUTH_LOGIN_USER.accessButtons.contains('pusherManage_add')}">
+                                    <a th:href="@{toAdd_0}" style="width: 100%;background-color: #3dc7ab;color: white;" class="btn btn-white btn-sm" data-toggle="tooltip" data-placement="left" title="" data-original-title="Refresh inbox"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;新增推送器&nbsp;&nbsp;&nbsp;&nbsp;</a>
+                                </div>
+                                <div class="col-sm-6 m-b-xs">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5>推送器列表</h5>
+                            <div class="ibox-tools">
+                                <a class="collapse-link">
+                                    <i class="fa fa-chevron-up"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="table-responsive">
+                                <table class=" table table-hover" data-page-size="10">
+                                    <thead>
+                                    <tr>
+                                        <th width="5%">ID</th>
+                                        <th width="20%">名称</th>
+                                        <th width="20%">jar包</th>
+                                        <th width="15%">版本</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="news : ${resultVo.result}">
+                                        <td th:text="${news.id}">""</td>
+                                        <td th:text="${news.name}">""</td>
+                                        <a ><td th:text="${news.fileName}">""</td></a>
+                                        <td th:text="${news.version}">""</td>
+                                        <td >
+                                            <a th:if="${session.SESSION_AUTH_LOGIN_USER.accessButtons.contains('pusherManage_edit')}" th:href="@{'toAdd_'+${news.id}}" title="修改"><i class="fa fa-edit text-navy"></i></a>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;
+                                            <!--<a th:href="@{'delete_'+${news.id}}" title="删除"><i class="fa fa-trash-o text-navy"></i></a>-->
+                                            <a th:if="${session.SESSION_AUTH_LOGIN_USER.accessButtons.contains('pusherManage_delete')}" th:name="${news.id}" onclick="javascript:deletePusher(this);" title="删除"><i class="fa fa-trash-o text-navy"></i></a>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;
+                                            <a th:name="${news.id}" target="_blank" th:href="@{'download_'+${news.id}}" title="下载"><i class="fa fa-arrow-down text-navy"></i></a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    <tr>
+                                        <td id="pageHTML" colspan="7" th:inline="text">
+                                        </td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer" th:include="footer :: copyright"></div>
+    </div>
+</div>
+
+<!-- Mainly scripts -->
+<script th:src="@{/js/jquery-2.1.1.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+<script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+
+<!-- Custom and plugin javascript -->
+<script th:src="@{/js/inspinia.js}"></script>
+<script th:src="@{/js/plugins/pace/pace.min.js}"></script>
+<script th:src="@{/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<link th:href="@{/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet" type="text/css" />
+
+<!-- common -->
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/bms-util.js}"></script>
+
+<script th:inline="javascript">
+    var pageHTML = [[${pageinationd}]];
+    $(document).ready(function () {
+        $("#pageHTML").html(pageHTML);
+    });
+
+
+    function deletePusher(obj) {
+        swal({
+                title: "确定删除吗？",
+                type: "warning",
+                text: "",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "确定删除！",
+                closeOnConfirm: false
+            },
+            function(isConfirm){
+                if (isConfirm){
+                    var pusherID = $(obj).attr("name");
+                    bms.requestAjaxGet("delete/"+pusherID,
+                        function(response){
+                            $(obj).parent().parent().remove();
+                            var totalCount = $("#totalCount").text();
+                            $("#totalCount").text(totalCount-1);
+                            swal({
+                                title: "删除成功！",
+                                text: "1秒后自动关闭。",
+                                timer: 1000,
+                                showConfirmButton: false
+                            });
+                        },function(response){
+                            sweetAlert(response.resMsg,"","error");
+                        });
+                }
+            });
+    }
+</script>
+
+</body>
+
+</html>

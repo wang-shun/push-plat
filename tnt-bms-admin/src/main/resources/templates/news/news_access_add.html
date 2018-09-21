@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>分销推送平台</title>
+
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+
+<!-- Toastr style -->
+
+<link th:href="@{/css/style.css}" rel="stylesheet" />
+
+<!-- summernote style -->
+<link th:href="@{/css/plugins/summernote/summernote.css}" rel="stylesheet" />
+<link th:href="@{/css/plugins/summernote/summernote-bs3.css}" rel="stylesheet" />
+<style>
+    .show{display: block;}
+    .hidden{display: none;}
+</style>
+</head>
+
+<body>
+
+    <div id="wrapper">
+		<nav class="navbar-default navbar-static-side" role="navigation" th:include="nav :: navigation"></nav>
+		<div id="page-wrapper" class="gray-bg">
+        	<div class="border-bottom" th:include="header :: headerTop"></div>
+      		<div class="row wrapper border-bottom white-bg page-heading" th:fragment="headerNav">
+		   		<div class="col-lg-10">
+		     		<h2>接入配置管理</h2>
+		          	<ol class="breadcrumb">
+			            <li>
+                            <a th:href="@{/main/dashboard}">首页</a>
+			            </li>
+                        <li>
+                            <a>配置管理</a>
+                        </li>
+			          	<li class="active">
+			             	<strong th:switch="${mode}">
+                                <span th:case="access">新增接入配置</span>
+                                <span th:case="group">新增分组配置</span>
+                            </strong>
+			          	</li>
+					</ol>
+		      	</div>
+		      	<div class="col-lg-2">
+		      	</div>
+		  	</div>
+        	<div class="wrapper wrapper-content animated fadeInRight">
+            
+            
+            
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5 th:switch="${mode}">
+                                <span th:case="access">新增接入配置</span>
+                                <span th:case="group">新增分组配置</span>
+                            </h5>
+                            <a style="margin-left: 30px;" href="javascript:history.go(-1);" title="返回">
+                                <i class="fa fa-mail-reply"></i>
+                            </a>
+                            <div class="ibox-tools">
+                                <a class="collapse-link">
+                                    <i class="fa fa-chevron-up"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="ibox-content">
+                            <form id="formTag" action="addN" method="POST" class="form-horizontal" enctype="multipart/form-data">
+                            	<input type="hidden" th:value="${mode}" id="mode"/>
+                                <!--<input type="hidden" th:value="${groupToken}" id="groupToken"/>-->
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label" th:switch="${mode}">
+                                        <span th:case="access">接收方名称：</span>
+                                        <span th:case="group">分组名称</span>
+                                    </label>
+                                    <div class="col-sm-10">
+                                    	<input id="name" name="name" placeholder="必填" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div th:switch="${mode}">
+                                    <div th:case="access">
+                                       <div class="form-group"><label class="col-sm-2 control-label">分组名称：</label>
+                                            <div class="col-sm-10">
+                                                <!--<input id="groupToken" placeholder="需要加入分组，填写分组TOKEN，可选" name="groupToken" type="text" class="form-control" />-->
+                                                <select class="form-control" id="groupToken" name="groupToken">
+                                                    <option>--请选择分组--</option>
+                                                    <option  th:each="list:${groups}" th:value="${list.token}" th:text="${list.name }"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group"><label class="col-sm-2 control-label">推送地址：</label>
+                                            <div class="col-sm-10">
+                                                <input id="pushUrl" name="pushUrl" placeholder="给接收方推送的地址" type="text" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group"><label class="col-sm-2 control-label">密匙：</label>
+                                            <div class="col-sm-10">
+                                                <input id="encryptKey" name="encryptKey" placeholder="密匙" type="text" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group"><label class="col-sm-2 control-label">加密方式：</label>
+                                            <div class="col-sm-10">
+                                                <input id="encryptMethod" name="encryptMethod" placeholder="加密方式" type="text" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div th:case="group"></div>
+                                </div>
+                                <!--<div class="hr-line-dashed"></div>-->
+                                <div class="form-group"><label class="col-sm-2 control-label">开启状态：</label>
+                                    <div class="col-sm-10">
+                                        <select name="opened" id="opened" class="form-control" >
+                                            <option value="">--请选择--</option>
+                                            <option value="1">开启</option>
+                                            <option value="0">关闭</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group"><label class="col-sm-2 control-label">优先级：</label>
+                                    <div class="col-sm-10">
+                                        <select name="priority" id="priority" class="form-control" >
+                                            <option value="">--请选择--</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!--默认推送-->
+                                <input type="hidden" name="receiveType" id="receiveType" value="1"/>
+                                <!--<div class="form-group"><label class="col-sm-2 control-label">接收类型：</label>
+                                    <div class="col-sm-10">
+                                        <select name="receiveType" id="receiveType" class="form-control" >
+                                            <option value="">&#45;&#45;请选择&#45;&#45;</option>
+                                            <option value="1">推送</option>
+                                            <option value="2">拉取</option>
+                                        </select>
+                                    </div>
+                                </div>-->
+                                <div class="form-group"><label class="col-sm-2 control-label">推送类型：</label>
+                                    <div class="col-sm-10">
+                                        <select name="pushType" id="pushType" class="form-control" >
+                                            <option value="">--请选择--</option>
+                                            <option value="1">HTTP</option>
+                                            <!--<option value="2">TCP</option>-->
+                                            <option value="3">RPC</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="hidden form-group" id="pusherChoose" ><label class="col-sm-2 control-label">推送器：</label>
+                                    <div class="col-sm-10">
+                                        <select name="pushID" id="pushID" class="form-control" >
+                                            <option value="">--请选择--</option>
+                                            <option  th:each="list:${pusherDOS}" th:value="${list.id}" th:text="${list.name }"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group"><label class="col-sm-2 control-label">转换器：</label>
+                                    <div class="col-sm-10">
+                                        <select name="converterType" id="converterType" class="form-control" >
+                                            <option value="">--请选择--</option>
+                                            <option value="1">json</option>
+                                            <option value="2">xml</option>
+                                            <option value="3">form</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="convertChoose" ><label class="col-sm-2 control-label">转换映射器：</label>
+                                    <div class="col-sm-10">
+                                        <select name="convertID" id="convertID" class="form-control" >
+                                            <option value="">--请选择--</option>
+                                            <option  th:each="list:${convertDOS}" th:value="${list.id}" th:text="${list.name }"></option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group"><label class="col-sm-2 control-label">频率(每秒)：</label>
+                                    <div class="col-sm-10">
+                                        <input id="threshold" name="threshold" type="text" placeholder="给接收方每秒推送的频率" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="form-group"><label class="col-sm-2 control-label">连接超时时间(ms)：</label>
+                                    <div class="col-sm-10">
+                                        <input id="connectTimeOut" name="connectTimeOut" placeholder="连接超时时间" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="form-group"><label class="col-sm-2 control-label">读取超时时间(ms)：</label>
+                                    <div class="col-sm-10">
+                                        <input id="readTimeOut" name="readTimeOut" placeholder="给接收方推送超时时间" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4 col-sm-offset-2">
+                                        <button id="submitButton" class="btn btn-primary" type="button">&nbsp;&nbsp;&nbsp;&nbsp;提&nbsp;&nbsp;&nbsp;&nbsp;交&nbsp;&nbsp;&nbsp;&nbsp;</button>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <a id="returnButton" class="btn btn-primary" href="javascript:history.go(-1);">&nbsp;&nbsp;&nbsp;&nbsp;返&nbsp;&nbsp;&nbsp;&nbsp;回&nbsp;&nbsp;&nbsp;&nbsp;</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            </div>
+        	<div class="footer" th:include="footer :: copyright"></div>
+      	</div>
+	</div>
+	
+    <!-- Mainly scripts -->
+    <script th:src="@{/js/jquery-2.1.1.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+    <script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+    <script th:src="@{/js/plugins/sweetalert/sweetalert.min.js}"></script>
+    <link th:href="@{/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet" type="text/css" />
+    <!-- Custom and plugin javascript -->
+    <script th:src="@{/js/inspinia.js}"></script>
+    <script th:src="@{/js/plugins/pace/pace.min.js}"></script>
+    <!-- common -->
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/bms-util.js}"></script>
+    <script th:src="@{/js/newsAccess.js}"></script>
+
+    <script  th:inline="javascript">
+    </script>
+
+</body>
+
+</html>

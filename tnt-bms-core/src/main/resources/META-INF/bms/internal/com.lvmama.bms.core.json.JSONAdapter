@@ -1,0 +1,3 @@
+fastjson=com.lvmama.bms.core.json.fastjson.FastJSONAdapter
+jackson=com.lvmama.bms.core.json.jackson.JacksonJSONAdapter
+ltsjson=com.lvmama.bms.core.json.ltsjson.LtsJSONAdapter

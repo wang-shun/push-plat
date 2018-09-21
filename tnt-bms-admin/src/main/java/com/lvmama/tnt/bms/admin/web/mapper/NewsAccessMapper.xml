@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lvmama.tnt.bms.admin.web.mapper.NewsAccessMapper">
+    <resultMap id="BaseResultMap" type="com.lvmama.tnt.bms.admin.web.domain.po.NewsAccessDO">
+        <result column="id" property="id"/>
+        <result column="group_id" property="groupId"/>
+        <result column="groupToken" property="groupToken"/>
+        <result column="token" property="token"/>
+        <result column="name" property="name"/>
+        <result column="receive_type" property="receiveType"/>
+        <result column="push_type" property="pushType"/>
+        <result column="push_url" property="pushUrl"/>
+        <result column="is_open" property="opened"/>
+        <result column="converter_type" property="converterType"/>
+        <result column="priority" property="priority"/>
+        <result column="threshold" property="threshold"/>
+        <result column="connect_time_out" property="connectTimeOut"/>
+        <result column="read_time_out" property="readTimeOut"/>
+        <result column="version" property="version"/>
+        <result column="rpc_pusher_id" property="pushID"/>
+        <result column="convert_id" property="convertID"/>
+        <result column="encrypt_key" property="encryptKey"/>
+        <result column="encrypt_method" property="encryptMethod"/>
+    </resultMap>
+
+    <resultMap id="FullInfoMap" type="com.lvmama.tnt.bms.admin.web.domain.po.NewsAccessDO" extends="BaseResultMap">
+        <association  property="convertDO" column="rpc_pusher_id" javaType="com.lvmama.tnt.bms.admin.web.domain.po.ConvertDO" >
+            <result column="c_id" property="id"/>
+            <result column="c_name" property="name"/>
+            <result column="map" property="map"/>
+            <result column="c_version" property="version"/>
+        </association>
+        <association property="msgPusherDO" column="convert_id" javaType="com.lvmama.tnt.bms.admin.web.domain.po.MsgPusherDO">
+            <result column="p_id" property="id"/>
+            <result column="p_name" property="name"/>
+            <result column="file_name" property="fileName"/>
+            <result column="jar" property="jar"/>
+            <result column="p_version" property="version"/>
+        </association>
+    </resultMap>
+
+    <select id="findFullAccessInfo" parameterType="java.lang.Integer" resultMap="FullInfoMap">
+        SELECT
+            a.id,
+            a.group_id,
+            a.token,
+            a.`name`,
+            a.receive_type,
+            a.push_type,
+            a.push_url,
+            a.is_open,
+            a.converter_type,
+            a.priority,
+            a.threshold,
+            a.connect_time_out,
+            a.read_time_out,
+            a.version,
+            a.convert_id,
+            a.rpc_pusher_id,
+            a.encrypt_key,
+            a.encrypt_method,
+            c.id c_id,
+            c. `name` c_name,
+            c.map,
+            c.version c_version,
+            p.id p_id,
+            p.`name` p_name,
+            p.file_name,
+            p.jar,
+            p.version p_version
+        FROM
+            tnt_bms_news_access a,
+            tnt_bms_convert_map c,
+            tnt_bms_msg_pusher p
+        WHERE
+            a.convert_id = c.id
+        AND a.rpc_pusher_id = p.id
+        AND a.id = #{id}
+    </select>
+
+    <select id="findGroupsForChoose" resultMap="BaseResultMap">
+        select `name`,token from tnt_bms_news_access where group_id is null
+    </select>
+
+    <select id="findByGroupID" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select <include refid="all_column"/>
+        ,b.token as groupToken
+        from tnt_bms_news_access a
+        left join tnt_bms_news_access b on a.group_id = b.id
+        where a.group_id = #{groupID}
+        order by a.id desc
+    </select>
+
+    <select id="findByPage" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsAccessDO" resultMap="BaseResultMap">
+        select <include refid="all_column"/>
+        from tnt_bms_news_access a
+        <where>
+            <include refid="params_sql"/>
+            <if test="groupId == null">
+                and a.group_id is null
+            </if>
+        </where>
+        order by a.id desc
+    </select>
+
+    <select id="totalCount" resultType="java.lang.Long" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsAccessDO">
+        select count(*) from tnt_bms_news_access a
+        <where>
+            <include refid="params_sql"/>
+            <if test="groupId == null">
+                and a.group_id is null
+            </if>
+        </where>
+    </select>
+
+    <select id="selectChildren" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select <include refid="all_column"/>
+        from tnt_bms_news_access a
+        where a.group_id = #{groupId}
+    </select>
+
+    <select id="findByParam" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsAccessDO" resultMap="BaseResultMap">
+        select <include refid="all_column"/>
+        from tnt_bms_news_access a
+        <where>
+            <include refid="params_sql"/>
+        </where>
+    </select>
+    
+    <select id="fuzzyByName" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select a.id,a.name,a.token
+        from tnt_bms_news_access a
+        where a.`name` like CONCAT('%',#{keyword},'%') and a.group_id is not null
+    </select>
+
+    <select id="findNameByTokens" resultType="com.lvmama.tnt.bms.admin.web.domain.po.NewsAccessDO">
+        select a.token,a.name
+        from tnt_bms_news_access a
+        where a.token in
+        <foreach collection="list" close=")" item="item" open="(" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="findAccessGroupByToken" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="all_column"/>
+        ,b.token groupToken
+        from tnt_bms_news_access a
+        left join tnt_bms_news_access b on a.group_id = b.id
+        where a.token = #{token}
+    </select>
+
+    <select id="findById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select <include refid="all_column"/>
+        ,b.token groupToken
+        from tnt_bms_news_access a
+        left join tnt_bms_news_access b on a.group_id = b.id
+        where a.id = #{id}
+    </select>
+
+    <select id="findByToken" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="all_column"/>
+        ,b.token groupToken
+        from tnt_bms_news_access a
+        left join tnt_bms_news_access b on a.group_id = b.id
+        where a.token = #{token}
+    </select>
+
+    <select id="findByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="all_column"/>
+        ,b.token groupToken
+        from tnt_bms_news_access a
+        left join tnt_bms_news_access b on a.group_id = b.id
+        where a.`name` = #{name}
+    </select>
+
+    <select id="findByTokenBatch" parameterType="java.util.List" resultMap="BaseResultMap">
+        select <include refid="all_column"/>
+        ,b.token groupToken
+        from tnt_bms_news_access a
+        left join tnt_bms_news_access b on a.group_id = b.id
+        where a.token in
+        <foreach collection="list" close=")" item="item" open="(" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <sql id="all_column">
+        a.id,a.group_id,a.token,a.`name`,a.encrypt_key,a.encrypt_method,a.receive_type,a.push_type,a.push_url,a.is_open,a.converter_type,a.priority,a.threshold,a.connect_time_out,a.read_time_out,a.version,a.convert_id,a.rpc_pusher_id,a.modify_time,a.create_time
+    </sql>
+
+    <sql id="params_sql">
+        <if test="id != null and id != ''">
+            and a.id = #{id}
+        </if>
+        <if test="groupId != null">
+            and a.group_id = #{groupId}
+        </if>
+        <if test="token != null and token != ''">
+            and a.token = #{token}
+        </if>
+        <if test="name != null and name != ''">
+            and a.`name` like CONCAT('%',#{name},'%')
+        </if>
+        <if test="receiveType != null">
+            and a.receive_type = #{receiveType}
+        </if>
+        <if test="pushType != null">
+            and a.push_type = #{pushType}
+        </if>
+        <if test="pushUrl != null and pushUrl != ''">
+            and a.push_url = #{pushUrl}
+        </if>
+        <if test="opened != null">
+            and a.is_open = #{opened}
+        </if>
+        <if test="converterType != null">
+            and a.converter_type = #{converterType}
+        </if>
+        <if test="priority != null">
+            and a.priority = #{priority}
+        </if>
+        <if test="threshold != null">
+            and a.threshold = #{threshold}
+        </if>
+        <if test="connectTimeOut != null">
+            and a.connect_time_out = #{connectTimeOut}
+        </if>
+        <if test="readTimeOut != null">
+            and a.read_time_out = #{readTimeOut}
+        </if>
+    </sql>
+
+    <select id="dataVersion" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select version from tnt_bms_news_access  where token = #{token}
+    </select>
+
+    <select id="checkExist" resultType="java.lang.Integer">
+        select count(*)
+        from tnt_bms_news_access a
+        where b.token = #{groupToken}
+        and a.`name` =  #{name}
+    </select>
+
+    <select id="findByGroupToken" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+            a.id,
+            a.group_id,
+            a.token,
+            a.`name`,
+            a.encrypt_key,
+            a.encrypt_method,
+            a.receive_type,
+            a.push_type,
+            a.push_url,
+            a.is_open,
+            a.converter_type,
+            a.priority,
+            a.threshold,
+            a.conncet_time_out,
+            a.read_time_out,
+            a.version,
+            a.convert_id,
+            a.rpc_pusher_id,
+            b.token groupToken
+        from tnt_bms_news_access a
+        left join tnt_bms_news_access b on a.group_id = b.id
+        where b.token = #{groupToken}
+    </select>
+
+
+    <select id="existName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(*) from tnt_bms_news_access where `name` = #{name}
+    </select>
+
+    <delete id="delete" parameterType="java.lang.Long">
+        delete from tnt_bms_news_access where id = #{id}
+    </delete>
+
+    <delete id="deleteByToken" parameterType="java.lang.String">
+        delete from tnt_bms_news_access where token = #{token}
+    </delete>
+
+    <delete id="deleteByGroupId" parameterType="java.lang.Long">
+        delete from tnt_bms_news_access where group_id = #{groupId}
+    </delete>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsAccessDO">
+        insert into tnt_bms_news_access(group_id,token,`name`,encrypt_key,encrypt_method,receive_type,push_type,push_url,is_open,converter_type,priority,threshold,connect_time_out,read_time_out,modify_time,create_time,version,rpc_pusher_id,convert_id)
+        values (#{groupId},#{token},#{name},#{encryptKey},#{encryptMethod},#{receiveType},#{pushType},#{pushUrl},#{opened},#{converterType},#{priority},#{threshold},#{connectTimeOut},#{readTimeOut},#{modifyTime},#{createTime},#{version},#{pushID},#{convertID})
+    </insert>
+
+    <update id="update" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsAccessDO">
+        update tnt_bms_news_access
+        <set>
+            <if test="groupId != null">
+                group_id = #{groupId},
+            </if>
+            <if test="name != null and name != ''">
+                `name` = #{name},
+            </if>
+            <if test="receiveType != null">
+                receive_type = #{receiveType},
+            </if>
+            <if test="pushType != null">
+                push_type = #{pushType},
+            </if>
+            <if test="pushUrl != null">
+                push_url = #{pushUrl},
+            </if>
+            <if test="opened != null">
+                is_open = #{opened},
+            </if>
+            <if test="converterType != null">
+                converter_type = #{converterType},
+            </if>
+            <if test="priority != null">
+                priority = #{priority},
+            </if>
+            <if test="threshold != null">
+                threshold = #{threshold},
+            </if>
+            <if test="modifyTime != null ">
+                modify_time = #{modifyTime},
+            </if>
+            <if test="connectTimeOut != null">
+                connect_time_out =  #{connectTimeOut},
+            </if>
+            <if test="readTimeOut != null">
+                read_time_out =  #{readTimeOut},
+            </if>
+            <if test="version != null">
+                version = #{version},
+            </if>
+            <if test="pushID != null">
+                rpc_pusher_id = #{pushID},
+            </if>
+            convert_id = #{convertID},
+            encrypt_key = #{encryptKey},
+            encrypt_method = #{encryptMethod},
+        </set>
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="token != null and token != ''">
+                and token = #{token}
+            </if>
+        </where>
+    </update>
+
+</mapper>

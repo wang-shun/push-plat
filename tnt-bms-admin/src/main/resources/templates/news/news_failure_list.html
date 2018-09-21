@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>分销推送平台</title>
+
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+
+    <link th:href="@{/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
+    <link th:href="@{/css/plugins/footable/footable.core.css}" rel="stylesheet"/>
+
+</head>
+
+<body>
+
+<div id="wrapper">
+    <nav class="navbar-default navbar-static-side" role="navigation" th:include="nav :: navigation"></nav>
+    <div id="page-wrapper" class="gray-bg">
+        <div class="border-bottom" th:include="header :: headerTop"></div>
+        <div class="row wrapper border-bottom white-bg page-heading" th:fragment="headerNav">
+            <div class="col-lg-10">
+                <h2>推送失败管理</h2>
+                <ol class="breadcrumb">
+                    <li>
+                        <a th:href="@{/main/dashboard}">首页</a>
+                    </li>
+                    <li>
+                        <a>配置管理</a>
+                    </li>
+                    <li class="active">
+                        <strong>消息失败列表</strong>
+                    </li>
+                </ol>
+            </div>
+            <div class="col-lg-2">
+            </div>
+        </div>
+
+        <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5>搜索&amp;操作</h5>
+                            <div class="ibox-tools">
+                                <a class="collapse-link">
+                                    <i class="fa fa-chevron-up"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="ibox-content" style="display: block;">
+                            <form th:action="@{/config/failure/list}" th:object="${pushFailureDO}" method="post" id="searchForm">
+                                <div class="row">
+                                    <div class="col-sm-3 m-b-xs">
+                                        <input id="msgId" th:field="*{msgId}"  placeholder="业务ID" class="form-control" type="text" />
+                                    </div>
+                                    <div class="col-sm-3 m-b-xs">
+                                        <input id="msgType" th:field="*{msgType}"  placeholder="消息类型" class="form-control" type="text" />
+                                    </div>
+                                    <div class="col-sm-3 m-b-xs">
+                                        <input id="token" th:field="*{token}"  placeholder="分销商TOKEN" class="form-control" type="text" />
+                                    </div>
+                                    <div class="col-sm-2 m-b-xs">
+                                        <button class="btn btn-primary btn-block" type="submit"><i class="fa fa-search"></i>&nbsp;&nbsp;&nbsp;&nbsp;<strong>搜索</strong></button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="row">
+                                <div class="col-sm-2 m-b-xs">
+                                </div>
+                                <div class="col-sm-6 m-b-xs">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5>消息失败列表</h5>
+                            <div class="ibox-tools">
+                                <a class="collapse-link">
+                                    <i class="fa fa-chevron-up"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="table-responsive">
+                                <table class=" table table-hover" data-page-size="10">
+                                    <thead>
+                                    <tr>
+                                        <th width="10%">业务ID</th>
+                                        <th width="10%">消息类型</th>
+                                        <th width="5%">重试次数</th>
+                                        <th width="20%">分销商TOKEN</th>
+                                        <th width="10%">接收时间</th>
+                                        <th width="10%">推送时间时间</th>
+                                        <th width="30%">消息内容</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="news : ${resultVo.result}">
+                                        <td th:text="${news.msgId}">""</td>
+                                        <td th:text="${news.msgType}">""</td>
+                                        <td th:text="${news.maxRetry}">""</td>
+                                        <td th:text="${news.token}">""</td>
+                                        <td th:text="${news.receiveTime} != null ? ${#dates.format(news.receiveTime,'yyyy-MM-dd HH:mm:ss')} : ''">""</td>
+                                        <td th:text="${news.pushTime} != null ? ${#dates.format(news.pushTime,'yyyy-MM-dd HH:mm:ss')} : ''">""</td>
+                                        <td th:text="${news.msgContent}">""</td>
+                                        <td >
+                                            <a th:if="${session.SESSION_AUTH_LOGIN_USER.accessButtons.contains('pushFailureManage_edit')}" th:name="${news.id}" onclick="javascript:retrySend(this);" title="重新发送"><i class="fa fa-send text-navy"></i></a>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;
+                                            <a th:if="${session.SESSION_AUTH_LOGIN_USER.accessButtons.contains('pushFailureManage_delete')}" th:name="${news.id}" onclick="javascript:deleteNews(this);" title="删除"><i class="fa fa-trash-o text-navy"></i></a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    <tr>
+                                        <td id="pageHTML" colspan="7" th:inline="text">
+                                        </td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer" th:include="footer :: copyright"></div>
+    </div>
+</div>
+
+<!-- Mainly scripts -->
+<script th:src="@{/js/jquery-2.1.1.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+<script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+
+<!-- Custom and plugin javascript -->
+<script th:src="@{/js/inspinia.js}"></script>
+<script th:src="@{/js/plugins/pace/pace.min.js}"></script>
+<script th:src="@{/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<link th:href="@{/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet" type="text/css" />
+
+<!-- common -->
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/bms-util.js}"></script>
+
+<script th:inline="javascript">
+    var pageHTML = [[${pageinationd}]];
+    $(document).ready(function () {
+        $("#pageHTML").html(pageHTML);
+    });
+
+    function retrySend(obj) {
+        var id = $(obj).attr("name");
+        bms.requestAjaxGet("send/"+id,
+            function(response){
+                swal({
+                    title: "发送成功！",
+                    text: "1秒后自动关闭。",
+                    timer: 1000,
+                    showConfirmButton: false
+                });
+                $(obj).parent().parent().remove();
+            },function(response){
+                sweetAlert(response.resMsg,"","error");
+            });
+    }
+
+    function deleteNews(obj) {
+        var id = $(obj).attr("name");
+        bms.requestAjaxGet("delete/"+id,
+            function(response){
+                $(obj).parent().parent().remove();
+                var totalCount = $("#totalCount").text();
+                $("#totalCount").text(totalCount-1);
+            },function(response){
+                sweetAlert(response.resMsg,"","error");
+            });
+    }
+</script>
+
+</body>
+
+</html>

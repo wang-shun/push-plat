@@ -1,0 +1,4 @@
+slf4j=com.lvmama.bms.core.logger.slf4j.Slf4jLoggerAdapter
+jcl=com.lvmama.bms.core.logger.jcl.JclLoggerAdapter
+log4j=com.lvmama.bms.core.logger.log4j.Log4jLoggerAdapter
+jdk=com.lvmama.bms.core.logger.jdk.JdkLoggerAdapter

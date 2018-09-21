@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lvmama.tnt.bms.admin.web.mapper.PushFailureMapper">
+
+    <resultMap id="BaseResultMap" type="com.lvmama.tnt.bms.admin.web.domain.po.PushFailureDO">
+        <result column="id" property="id"/>
+        <result column="msg_id" property="msgId"/>
+        <result column="msg_type_id" property="msgTypeId"/>
+        <result column="msg_type" property="msgType"/>
+        <result column="msg_content" property="msgContent"/>
+        <result column="max_retry" property="maxRetry"/>
+        <result column="token_id" property="tokenId"/>
+        <result column="token" property="token"/>
+        <result column="receive_time" property="receiveTime"/>
+        <result column="push_time" property="pushTime"/>
+    </resultMap>
+
+    <sql id="param">
+        <if test="msgId != null and msgId != ''">
+            and msg_id = #{msgId}
+        </if>
+        <if test="msgType != null and msgType != ''">
+            and msg_type like concat('%',concat(#{msgType},'%'))
+        </if>
+        <if test="token != null and token != ''">
+            and token = #{token}
+        </if>
+    </sql>
+
+    <sql id="column_sql">
+        id,msg_id,msg_type_id,msg_type,msg_content,max_retry,token_id,token,receive_time,push_time
+    </sql>
+
+    <select id="findById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="column_sql"/>
+        from tnt_bms_push_failure
+        where id = #{id}
+    </select>
+
+    <delete id="delete" parameterType="java.lang.Integer">
+        delete from tnt_bms_push_failure where id = #{id}
+    </delete>
+
+    <select id="findByPage" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.PushFailureDO" resultMap="BaseResultMap">
+        select
+        <include refid="column_sql"/>
+        from tnt_bms_push_failure
+        <where>
+            <include refid="param"/>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="totalCount" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.PushFailureDO" resultType="java.lang.Long">
+        select count(*) from tnt_bms_push_failure
+        <where>
+            <include refid="param"/>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.PushFailureDO">
+        insert into tnt_bms_push_failure(msg_id,msg_type_id,msg_type,msg_content,max_retry,token_id,token,receive_time,push_time)
+        values(#{msgId},#{msgTypeId},#{msgType},#{msgContent},#{maxRetry},#{tokenId},#{token},#{receiveTime},#{pushTime})
+    </insert>
+
+    <insert id="batchInsert" parameterType="java.util.List" >
+        insert into tnt_bms_push_failure(msg_id,msg_type_id,msg_type,msg_content,max_retry,token_id,token,receive_time,push_time) values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.msgId},
+            #{item.msgTypeId},
+            #{item.msgType},
+            #{item.msgContent},
+            #{item.maxRetry},
+            #{item.tokenId},
+            #{item.token},
+            #{item.receiveTime},
+            #{item.pushTime})
+        </foreach>
+    </insert>
+
+</mapper>

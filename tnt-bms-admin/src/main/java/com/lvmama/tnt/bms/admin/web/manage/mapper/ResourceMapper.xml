@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lvmama.tnt.bms.admin.web.manage.mapper.ResourceMapper">
+
+    <resultMap id="BaseResultMap" type="com.lvmama.tnt.bms.admin.web.manage.domain.ResourcePO">
+        <result column="id" property="id"/>
+        <result column="res_code" property="resCode"/>
+        <result column="parent_code" property="parentCode"/>
+        <result column="index" property="index"/>
+        <result column="title" property="title"/>
+        <result column="path" property="path"/>
+        <result column="icon" property="icon"/>
+        <result column="level" property="level"/>
+        <result column="type" property="type"/>
+        <result column="leaf_flag" property="leafFlag"/>
+        <result column="notes" property="notes"/>
+        <result column="active" property="active"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+    </resultMap>
+
+    <sql id="column_sql">
+        id,res_code,parent_code,`index`,title,path,icon,`level`,`type`,leaf_flag,notes,active,create_time,modify_time
+    </sql>
+
+    <sql id="param_sql">
+        <if test="id != null">
+            and id = #{id}
+        </if>
+        <if test="resCode != null and resCode != ''">
+            and res_code = #{resCode}
+        </if>
+        <if test="parentCode != null and parentCode != ''">
+            and parent_code = #{parentCode}
+        </if>
+        <if test="index != null and index != ''">
+            and `index` = #{index}
+        </if>
+        <if test="title != null and title != ''">
+            and title like concat('%',concat(#{title},'%'))
+        </if>
+        <if test="title != null and title != ''">
+            and title like concat('%',concat(#{title},'%'))
+        </if>
+        <if test="active != null and active != ''">
+            and active = #{active}
+        </if>
+        <if test="leafFlag != null and leafFlag != ''">
+            and leaf_flag = #{leafFlag}
+        </if>
+    </sql>
+
+    <resultMap id="ResourceNodeMap" type="com.lvmama.tnt.bms.admin.web.manage.domain.ResourceNode">
+        <result column="id" property="id"/>
+        <result column="res_code" property="code"/>
+        <result column="title" property="label"/>
+        <result column="leaf_flag" property="isLeaf"/>
+       <result column="permissions" property="permissions"/>
+        <collection property="children" column="{roleId=role_id,parentCode=res_code}" select="loadDistributeStore"
+                    ofType="com.lvmama.tnt.bms.admin.web.manage.domain.ResourceNode"/>
+    </resultMap>
+
+    <select id="loadDistributeStore" resultMap="ResourceNodeMap" parameterType="java.util.Map">
+      <if test="roleId == null">
+          select rs.id,rs.res_code,rs.title,rs.leaf_flag,null as role_id,null as permissions
+          from t_bms_resource rs
+          where rs.active = 'Y'
+          and rs.parent_code = #{parentCode}
+      </if>
+      <if test="roleId != null">
+          select rs.id,rs.res_code,rs.title,rs.leaf_flag,rr.role_id,rr.permissions
+          from t_bms_resource rs
+          left join t_bms_role_resource rr on rs.id = rr.resource_id
+          where rs.active = 'Y'
+          and rr.role_id = #{roleId}
+          and rs.parent_code = #{parentCode}
+      </if>
+    </select>
+
+    <select id="findById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select <include refid="column_sql"/>
+        from t_bms_resource
+        where id = #{id}
+    </select>
+
+    <select id="findByParams" resultMap="BaseResultMap" parameterType="com.lvmama.tnt.bms.admin.web.manage.domain.ResourcePO">
+        select <include refid="column_sql"/>
+        from t_bms_resource
+        <where>
+            <include refid="param_sql"/>
+        </where>
+    </select>
+
+    <insert id="save" parameterType="com.lvmama.tnt.bms.admin.web.manage.domain.ResourcePO">
+        insert into t_bms_resource(res_code,parent_code,`index`,title,path,icon,`level`,`type`,leaf_flag,notes,active,create_time,modify_time)
+        values (#{resCode},#{parentCode},#{index},#{title},#{path},#{icon},#{level},#{type},#{leafFlag},#{notes},#{active},#{createTime},#{modifyTime})
+    </insert>
+
+    <update id="update" parameterType="com.lvmama.tnt.bms.admin.web.manage.domain.ResourcePO">
+        update t_bms_resource
+        <set>
+            <if test="resCode != null and resCode != ''">
+                res_code = #{resCode},
+            </if>
+            <if test="parentCode != null and parentCode != ''">
+                parent_code = #{parentCode},
+            </if>
+            <if test="index != null and index != ''">
+                `index` = #{index},
+            </if>
+            <if test="title != null and title != ''">
+                title = #{title},
+            </if>
+            <if test="path != null and path != ''">
+                path = #{path},
+            </if>
+            <if test="icon != null and icon != ''">
+                icon = #{icon},
+            </if>
+            <if test="level != null">
+                `level` = #{level},
+            </if>
+            <if test="type != null">
+                `type` = #{type},
+            </if>
+            <if test="notes != null and notes != ''">
+                notes = #{notes},
+            </if>
+            <if test="active != null and active != ''">
+                active = #{active},
+            </if>
+            <if test="leafFlag != null and leafFlag != ''">
+                leaf_flag = #{leafFlag},
+            </if>
+            <if test="modifyTime != null">
+                modify_time = #{modifyTime},
+            </if>
+        </set>
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+        </where>
+    </update>
+
+    <delete id="deleteRoleResByRoleId" parameterType="java.lang.Integer">
+        delete from t_bms_role_resource where role_id = #{roleId}
+    </delete>
+    
+    <insert id="saveRoleResourceBatch" parameterType="java.util.List">
+        insert into t_bms_role_resource(resource_id, role_id, permissions) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.resourceId},#{item.roleId},#{item.permissions})
+        </foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>分销推送平台</title>
+
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<!--<link th:href="@{/css/jqTable.css}" rel="stylesheet" />-->
+<link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+<link th:href="@{/css/style.css}" rel="stylesheet" />
+
+<link th:href="@{/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
+<link th:href="@{/css/plugins/footable/footable.core.css}" rel="stylesheet"/>
+	<style>
+		.show {
+			display:block;
+		}
+		.hidden {
+			display:none;
+		}
+	</style>
+</head>
+
+<body>
+
+    <div id="wrapper">
+		<nav class="navbar-default navbar-static-side" role="navigation" th:include="nav :: navigation"></nav>
+		<div id="page-wrapper" class="gray-bg">
+        	<div class="border-bottom" th:include="header :: headerTop"></div>
+      		<div class="row wrapper border-bottom white-bg page-heading" th:fragment="headerNav">
+		   		<div class="col-lg-10">
+		     		<h2>接入配置管理</h2>
+		          	<ol class="breadcrumb">
+			            <li>
+			            	<a th:href="@{/main/dashboard}">首页</a>
+			            </li>
+			            <li>
+			            	<a>配置管理</a>
+			         	</li>
+			          	<li class="active">
+			             	<strong>接入配置列表</strong>
+			          	</li>
+					</ol>
+		      	</div>
+		      	<div class="col-lg-2">
+		      	</div>
+		  	</div>
+		  	
+        	<div class="wrapper wrapper-content animated fadeInRight">
+            	<div class="row">
+	            	<div class="col-lg-12">
+		            	<div class="ibox float-e-margins">
+		                    <div class="ibox-title">
+		                        <h5>搜索&amp;操作</h5>
+		                        <div class="ibox-tools">
+		                            <a class="collapse-link">
+		                                <i class="fa fa-chevron-up"></i>
+		                            </a>
+		                        </div>
+		                    </div>
+		                    <div class="ibox-content" style="display: block;">
+		                    	<form th:action="@{/config/access/list}" th:object="${newsAccessDO}" method="post" id="searchForm">
+									<input th:field="*{mode}" type="hidden" id="mode" />
+									<input th:field="*{groupId}" type="hidden" id="groupId"/>
+									<div class="row">
+										<div class="col-sm-3 m-b-xs">
+											<div th:switch="${mode}">
+												<div th:case="access">
+													<input id="title" th:field="*{name}"  placeholder="接收方名称" class="form-control" type="text" />
+												</div>
+												<div th:case="group">
+													<input id="title_group" th:field="*{name}"  placeholder="分组名称" class="form-control" type="text" />
+												</div>
+											</div>
+										</div>
+										<div class="col-sm-3 m-b-xs" th:if="${mode=='access'}">
+											<!--<div th:switch="${mode}">-->
+												<!--<div th:case="access">-->
+													<input id="access_token" th:field="*{token}"  placeholder="Token" class="form-control" type="text" />
+												<!--</div>-->
+												<!--<div th:case="group">-->
+													<!--<input id="group_token" th:field="*{token}"  placeholder="分组Token" class="form-control" type="text" />-->
+												<!--</div>-->
+											<!--</div>-->
+										</div>
+										<div class="col-sm-2 m-b-xs">
+											<select th:field="*{opened}" id="opened" class="form-control">
+												<option value="" th:selected="${newsAccessDO.opened} == null">--请选择开启状态--</option>
+												<option value="1" th:selected="${newsAccessDO.opened} == 1">开启</option>
+												<option value="0" th:selected="${newsAccessDO.opened} == 0">关闭</option>
+											</select>
+										</div>
+										<div class="col-sm-2 m-b-xs">
+											<select th:field="*{receiveType}" id="opened" class="form-control">
+												<option value="" th:selected="${newsAccessDO.receiveType} == null">--请选择接收类型--</option>
+												<option value="1" th:selected="${newsAccessDO.receiveType} == 1">推送</option>
+												<!--<option value="2" th:selected="${newsAccessDO.receiveType} == 2">拉取</option>-->
+											</select>
+										</div>
+										<div class="col-sm-2 m-b-xs">
+											<select th:field="*{pushType}" id="opened" class="form-control">
+												<option value="" th:selected="${newsAccessDO.pushType} == null">--请选择推送类型--</option>
+												<option value="1" th:selected="${newsAccessDO.pushType} == 1">HTTP</option>
+												<!--<option value="2" th:selected="${newsAccessDO.pushType} == 2">TCP</option>-->
+												<option value="3" th:selected="${newsAccessDO.pushType} == 3">RPC</option>
+											</select>
+										</div>
+										<div class="col-sm-2 m-b-xs">
+											<select th:field="*{converterType}" id="opened" class="form-control">
+												<option value="" th:selected="${newsAccessDO.converterType} == null">--请选择转换器--</option>
+												<option value="1" th:selected="${newsAccessDO.converterType} == 1">json</option>
+												<option value="2" th:selected="${newsAccessDO.converterType} == 2">xml</option>
+												<option value="3" th:selected="${newsAccessDO.converterType} == 3">form</option>
+											</select>
+										</div>
+										<div class="col-sm-2 m-b-xs">
+											<select id="priority" th:field="*{priority}" class="form-control" >
+												<option value="">--请选择优先级--</option>
+												<option value="1"  th:selected="${newsAccessDO.priority} == 1">1</option>
+												<option value="2"  th:selected="${newsAccessDO.priority} == 2">2</option>
+												<option value="3"  th:selected="${newsAccessDO.priority} == 3">3</option>
+												<option value="4"  th:selected="${newsAccessDO.priority} == 4">4</option>
+												<option value="5"  th:selected="${newsAccessDO.priority} == 5">5</option>
+												<option value="6"  th:selected="${newsAccessDO.priority} == 6">6</option>
+												<option value="7"  th:selected="${newsAccessDO.priority} == 7">7</option>
+												<option value="8"  th:selected="${newsAccessDO.priority} == 8">8</option>
+												<option value="9"  th:selected="${newsAccessDO.priority} == 9">9</option>
+												<option value="10"  th:selected="${newsAccessDO.priority} == 10">10</option>
+											</select>
+										</div>
+										<div class="col-sm-2 m-b-xs">
+											<button class="btn btn-primary btn-block" type="submit"><i class="fa fa-search"></i>&nbsp;&nbsp;&nbsp;&nbsp;<strong>搜索</strong></button>
+										</div>
+									</div>
+	                             </form>
+	                            <div class="row" >
+		                            <div class="col-sm-2 m-b-xs" th:if="${session.SESSION_AUTH_LOGIN_USER.accessButtons.contains('newAccessManage_add')}" >
+					                    <a th:href="@{toAdd_access}" style="width: 100%;background-color: #3dc7ab;color: white;" class="btn btn-white " data-toggle="tooltip" data-placement="left" title="" data-original-title="Refresh inbox"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;新增接入&nbsp;&nbsp;&nbsp;&nbsp;</a>
+					                </div>
+									<div class="col-sm-2 m-b-xs" th:if="${session.SESSION_AUTH_LOGIN_USER.accessButtons.contains('newAccessManage_add')}" >
+										<a th:href="@{toAdd_group}" style="width: 100%;background-color: #3dc7ab;color: white;" class="btn btn-white " data-toggle="tooltip" data-placement="left" title="" data-original-title="Refresh inbox"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;新增分组&nbsp;&nbsp;&nbsp;&nbsp;</a>
+									</div>
+					       		</div>
+
+		                   </div>
+	                	</div>
+                	</div>
+                	<div class="col-lg-12">
+	                    <div class="ibox float-e-margins">
+	                        <div class="ibox-title">
+	                            <h5 th:text="${mode}=='access'?'接入配置列表':'分组列表'"></h5>
+									<span style="margin-left: 30px;" th:switch="${mode}">
+										<span th:case="access">
+											<a href="list" title="返回分组列表">
+												<i class="fa fa-mail-reply"></i>
+											</a>
+										</span>
+									</span>
+								<div class="ibox-tools">
+									<a class="collapse-link">
+										<i class="fa fa-chevron-up"></i>
+									</a>
+								</div>
+	                        </div>
+
+							<div class="ibox-content">
+								<table class="table table-stripped toggle-arrow-tiny" data-page-size="10">
+									<thead>
+										<tr>
+											<th width="10%" data-toggle="true" th:text="${mode}=='access'?'接收方名称':'分组名称'">
+											</th>
+											<span style="margin-left: 30px;" th:switch="${mode}">
+												<span th:case="access">
+													<th width="18%">接收方标识</th>
+													<th width="18%">推送接口</th>
+												</span>
+											</span>
+											<th width="6%">接收类型</th>
+											<th width="6%">推送类型</th>
+											<th width="6%">开启状态</th>
+											<th width="6%">转换器</th>
+											<th width="6%">优先级</th>
+											<th width="5%">频率(每秒)</th>
+											<!--<th width="6%">超时(ms)</th>-->
+											<th width="10%">操作</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="news,newsStat : ${resultVo.result}" class="group_row" >
+											<td th:text="${news.name}">""</td>
+											<span style="margin-left: 30px;" th:switch="${mode}">
+												<span th:case="access">
+													<td th:text="${news.token}">""</td>
+													<td th:text="${news.pushUrl}">""</td>
+												</span>
+											</span>
+											<td th:text="${news.receiveType} == 1 ? '推送' : (${news.receiveType} == 2 ? '拉取' : '')">""</td>
+											<td th:switch="${news.pushType}">
+												<span th:case="1">HTTP</span>
+												<span th:case="2">TCP</span>
+												<span th:case="3">RPC</span>
+											</td>
+											<td th:text="${news.opened} == 1 ? '开启' : '关闭'">""</td>
+											<td th:switch="${news.converterType}">
+												<span th:case="1">json</span>
+												<span th:case="2">xml</span>
+												<span th:case="3">form</span>
+											</td>
+											<td th:text="${news.priority}">""</td>
+											<td th:text="${news.threshold}">""</td>
+											<!--<td th:text="${news.timeOut}">""</td>-->
+											<td>
+												<a th:if="${session.SESSION_AUTH_LOGIN_USER.accessButtons.contains('newAccessManage_edit')}"  th:href="@{'toEdit/'+${mode}+'/'+${news.id}}" title="修改"><i class="fa fa-edit text-navy"></i></a>
+												&nbsp;&nbsp;
+												<span th:if="${session.SESSION_AUTH_LOGIN_USER.accessButtons.contains('newAccessManage_delete')}">
+													<a th:name="${news.id}" th:if="${news.name != '默认分组'}" onclick="javascript:deleteType(this);" title="删除"><i class="fa fa-trash-o text-navy"></i></a>
+												</span>
+												&nbsp;&nbsp;
+												<span th:switch="${mode}">
+													<span th:case="group">
+														<a th:name="${news.id}"  onclick="javascript:expand(this);" title="展开"><i class="fa fa-arrow-right text-navy"></i> </a>
+													</span>
+													<!--<span th:case="access">
+														<span th:if="${news.groupId != 0}">
+															<a th:name="${news.id}" onclick="javascript:removeFromGroup(this);" title="移除"><i class="fa fa-minus text-navy"></i> </a>
+														</span>
+													</span>-->
+												</span>
+												<!--fa-expand-->
+											</td>
+										</tr>
+									</tbody>
+									<tfoot>
+										<tr>
+											<td id="pageHTML" colspan="7" th:inline="text">
+											</td>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+	           			</div>
+                	</div>
+            	</div>
+        	</div>
+        	<div class="footer" th:include="footer :: copyright"></div>
+      	</div>
+	</div>
+	
+    <!-- Mainly scripts -->
+    <script th:src="@{/js/jquery-2.1.1.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+    <script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+	<script th:src="@{/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<link th:href="@{/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet" type="text/css" />
+	<!-- Custom and plugin javascript -->
+	<script th:src="@{/js/inspinia.js}"></script>
+	<script th:src="@{/js/plugins/pace/pace.min.js}"></script>
+    <!-- common -->
+    <script th:src="@{/js/common.js}"></script>
+	<script th:src="@{/js/bms-util.js}"></script>
+
+    <script th:inline="javascript">
+	    var pageHTML = [[${pageinationd}]];
+		$(document).ready(function () {
+			$("#pageHTML").html(pageHTML);
+		});
+        /**
+		 * 分组展开
+         * @param obj
+         */
+		function expand(obj) {
+            $("#searchForm").get(0).reset();
+            var groupID = $(obj).attr("name");
+            $("#mode").val("access");
+            $("#groupId").val(groupID);
+            $("#searchForm").submit();
+        }
+        /**
+		 * 从分组内移除
+         * @param obj
+         */
+        function removeFromGroup(obj) {
+            swal({
+                    title: "确定移除吗？",
+                    type: "warning",
+                    text: "",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "确定移除！",
+                    closeOnConfirm: false
+                },
+                function(isConfirm){
+                    if (isConfirm){
+                        var typeId = $(obj).attr("name");
+                        bms.requestAjaxGet("removeGroup/"+typeId,
+                            function(response){
+                                $(obj).parent().parent().parent().parent().parent().remove();
+                                var totalCount = $("#totalCount").text();
+                                $("#totalCount").text(totalCount-1);
+                                swal({
+                                    title: "移除成功！",
+                                    text: "1秒后自动关闭。",
+                                    timer: 1000,
+                                    showConfirmButton: false
+                                });
+                            },function(response){
+                                sweetAlert(response.resMsg,"","error");
+                            });
+                    }
+                });
+        }
+
+        function deleteType(obj) {
+            var mode = $("#mode").val();
+            var title = "确定删除吗？";
+            var text = "";
+//            if (mode == "group")
+//                text = "组下成员将移到默认分组";
+            swal({
+                    title: title,
+                    type: "warning",
+                    text: text,
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "确定删除！",
+                    closeOnConfirm: false
+                },
+                function(isConfirm){
+                	if (isConfirm){
+                        var typeId = $(obj).attr("name");
+                        bms.requestAjaxGet("delete/"+typeId,
+                            function(response){
+                                $("#searchForm").submit();
+                                swal({
+                                    title: "删除成功！",
+                                    text: "1秒后自动关闭。",
+                                    timer: 1000,
+                                    showConfirmButton: false
+                                });
+                            },function(response){
+                                sweetAlert(response.resMsg,"","error");
+                            });
+					}
+                });
+        }
+
+    </script>
+
+</body>
+
+</html>

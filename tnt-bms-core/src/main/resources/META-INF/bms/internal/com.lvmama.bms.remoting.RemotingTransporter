@@ -1,0 +1,3 @@
+netty=com.lvmama.bms.remoting.netty.NettyRemotingTransporter
+mina=com.lvmama.bms.remoting.mina.MinaRemotingTransporter
+lts=com.lvmama.bms.remoting.lts.LtsRemotingTransporter

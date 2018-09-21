@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lvmama.bms.scheduler.store.mysql.mapper.MsgTokenMapper">
+	
+	<insert id="saveMsgToken">
+		INSERT INTO `tnt_bms_msg_token_${msgTypeId}` (msg_id, token_id, status, create_time)
+		VALUES
+		<foreach collection="tokenIds" item="tokenId" open="(" close=")" separator="),(">
+			#{msgId}, #{tokenId}, 0, now()
+		</foreach>
+	</insert>
+
+	<delete id="deleteMsgToken" >
+		DELETE FROM `tnt_bms_msg_token_${msgTypeId}`
+		WHERE id = #{msgTokenId}
+	</delete>
+
+	<select id="queryMsgToken" resultType="com.lvmama.bms.scheduler.store.domain.po.MsgTokenPO">
+		SELECT id, msg_id, token_id, retry_count FROM `tnt_bms_msg_token_${msgTypeId}`
+		WHERE status = #{status} AND (retry_time IS NULL OR retry_time &lt;= NOW())
+		<if test="tokenInclude!=null and tokenInclude.size>0">
+			AND token_id IN
+			<foreach collection="tokenInclude" item="token" separator="," open="(" close=")">
+				#{token}
+			</foreach>
+		</if>
+		<if test="tokenExclude!=null and tokenExclude.size>0">
+			AND token_id NOT IN
+			<foreach collection="tokenExclude" item="token" separator="," open="(" close=")">
+				#{token}
+			</foreach>
+		</if>
+		ORDER BY create_time ASC
+		limit #{count}
+	</select>
+
+	<select id="queryMsgTokenBy" resultType="com.lvmama.bms.scheduler.store.domain.po.MsgTokenPO">
+		SELECT id, msg_id, token_id FROM `tnt_bms_msg_token_${msgTypeId}`
+		WHERE status = #{status}
+		<if test="startTime != null">
+			and modify_time <![CDATA[ > ]]> #{startTime}
+		</if>
+		<if test="endTime != null">
+			and modify_time <![CDATA[ < ]]> #{endTime}
+		</if>
+	</select>
+
+	<update id="updateStatus">
+		UPDATE tnt_bms_msg_token_${msgTypeId}
+		SET status = #{status}
+		WHERE id = #{msgTokenId}
+	</update>
+
+	<update id="batchUpdateStatus">
+		UPDATE tnt_bms_msg_token_${msgTypeId}
+		SET status = #{status}
+		WHERE id IN
+		<foreach collection="msgTokens" item="msgToken" open="(" close=")" separator=",">
+			#{msgToken.id}
+		</foreach>
+	</update>
+
+	<delete id="deleteByMsgId">
+		DELETE FROM tnt_bms_msg_token_${msgTypeId}
+		WHERE msg_id = #{msgId}
+	</delete>
+
+	<update id="recoverDeathMsgToken">
+		UPDATE tnt_bms_msg_token_${msgTypeId}
+		SET status = #{targetStatus}
+		WHERE status = #{initialStatus} and modify_time &lt;= #{deathTime}
+	</update>
+
+	<update id="updateRetryStatus">
+		UPDATE tnt_bms_msg_token_${msgTypeId}
+		SET retry_time = #{retryTime}, retry_count = #{retryCount}, status = #{status}
+		WHERE id = #{msgTokenId}
+	</update>
+
+	<delete id="deleteExpiredMsgToken">
+	  	DELETE FROM tnt_bms_msg_token_${msgTypeId}
+	  	WHERE token_id = #{tokenId}
+	</delete>
+
+</mapper>

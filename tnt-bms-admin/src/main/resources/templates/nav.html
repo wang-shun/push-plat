@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8"/>
+<title>Insert title here</title>
+</head>
+<body>
+	<nav class="navbar-default navbar-static-side" role="navigation" th:fragment="navigation" id="nav">
+        <div class="sidebar-collapse">
+            <ul class="nav metismenu" id="side-menu">
+                <li class="nav-header">
+                    <div class="dropdown profile-element"> 
+                    	<a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                            <span class="clear"> 
+                            	<span class="block m-t-xs">
+                            		<strong class="font-bold" style="font-size: 20px;">分销推送管理后台</strong>
+                             	</span> 
+                             </span>
+                     	</a>
+                    </div>
+                </li>
+                <li id="index" th:class="${#httpServletRequest.getServletPath().indexOf('main/dashboard')} ge 1 ? 'active' : ''">
+                    <a th:href="@{/main/dashboard}"><i class="fa fa-diamond"></i> <span class="nav-label">首页</span></a>
+                </li>
+                <li id="manage" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('manage')}" th:class="${#httpServletRequest.getServletPath().indexOf('manage')} ge 1 ? 'active' : ''">
+                    <a href="#"><i class="fa fa-shopping-cart"></i> <span class="nav-label">系统设置</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li id="userManage" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('userManage')}" th:class="${#httpServletRequest.getServletPath().indexOf('/user_list')} ge 1 ? 'active' : ''"><a th:href="@{/manage/user_list}">用户管理</a></li>
+                        <li id="roleManage" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('roleManage')}" th:class="${#httpServletRequest.getServletPath().indexOf('/role_list')} ge 1 ? 'active' : ''"><a th:href="@{/manage/role_list}">角色管理</a></li>
+                        <li id="resourceManage" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('resourceManage')}" th:class="${#httpServletRequest.getServletPath().indexOf('/resource_list')} ge 1 ? 'active' : ''"><a th:href="@{/manage/resource_list}">资源权限</a></li>
+                    </ul>
+                </li>
+                <li id="configuration" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('configuration')}" th:class="${#httpServletRequest.getServletPath().indexOf('config')} ge 1 ? 'active' : ''">
+                    <a href="#"><i class="fa fa-desktop"></i> <span class="nav-label">配置管理</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li id="newsTypeManage" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('newsTypeManage')}" th:class="${#httpServletRequest.getServletPath().indexOf('/type')} ge 1 ? 'active' : ''"><a th:href="@{/config/type/list}">消息类型管理</a></li>
+                        <li id="pusherManage" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('pusherManage')}" th:class="${#httpServletRequest.getServletPath().indexOf('/pusher')} ge 1 ? 'active' : ''"><a th:href="@{/config/pusher/list}">推送器管理</a></li>
+                        <li id="convertManage" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('convertManage')}" th:class="${#httpServletRequest.getServletPath().indexOf('/convert')} ge 1 ? 'active' : ''"><a th:href="@{/config/convert/list}">映射器管理</a></li>
+                        <li id="newAccessManage" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('newAccessManage')}" th:class="${#httpServletRequest.getServletPath().indexOf('/access')} ge 1 ? 'active' : ''"><a th:href="@{/config/access/list}">接入配置管理</a></li>
+                        <li id="pushFailureManage" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('pushFailureManage')}" th:class="${#httpServletRequest.getServletPath().indexOf('/failure')} ge 1 ? 'active' : ''"><a th:href="@{/config/failure/list}">推送失败管理</a></li>
+                        <li id="newPushManage" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('newPushManage')}" th:class="${#httpServletRequest.getServletPath().indexOf('/toManual')} ge 1 ? 'active' : ''"><a th:href="@{/config/push/toManual}">手动推送消息</a></li>
+                    </ul>
+                </li>
+                <li id="chart" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('chart')}" th:class="${#httpServletRequest.getServletPath().indexOf('chart')} ge 1 ? 'active' : ''">
+                    <a href="#"><i class="fa fa-globe"></i> <span class="nav-label">统计分析</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li id="chartGlobalList" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('chartGlobalList')}" th:class="${#httpServletRequest.getServletPath().indexOf('/global')} ge 1 ? 'active' : ''"><a th:href="@{/chart/global/list}">全局推送统计</a></li>
+                        <li id="chartTypeList" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('chartTypeList')}" th:class="${#httpServletRequest.getServletPath().indexOf('/type')} ge 1 ? 'active' : ''"><a th:href="@{/chart/type/list}">消息类型推送统计</a></li>
+                        <li id="chartWarningNews" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('chartWarningNews')}" th:class="${#httpServletRequest.getServletPath().indexOf('/news')} ge 1 ? 'active' : ''"><a th:href="@{/chart/warning/news}">接收方消息统计</a></li>
+                    </ul>
+                </li>
+                <li id="monitor" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('monitor')}" th:class="${#httpServletRequest.getServletPath().indexOf('logger')} ge 1 ? 'active' : ''">
+                    <a href="#"><i class="fa fa-shopping-cart"></i> <span class="nav-label">监控管理</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li id="loggerList" th:if="${session.SESSION_AUTH_LOGIN_USER.accessUris.contains('loggerList')}" th:class="${#httpServletRequest.getServletPath().indexOf('/index')} ge 1 ? 'active' : ''"><a th:href="@{/logger/index}">日志查看</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</body>
+</html>
+
+
+

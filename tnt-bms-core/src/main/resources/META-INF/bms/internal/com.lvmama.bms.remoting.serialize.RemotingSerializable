@@ -1,0 +1,4 @@
+adaptive=com.lvmama.bms.remoting.serialize.AdaptiveSerializable
+fastjson=com.lvmama.bms.remoting.serialize.FastJsonSerializable
+hessian2=com.lvmama.bms.remoting.serialize.Hessian2Serializable
+java=com.lvmama.bms.remoting.serialize.JavaSerializable

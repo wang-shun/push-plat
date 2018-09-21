@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+    <contextName>tnt-bms-pusher</contextName>
+
+    <!--输出到控制台 ConsoleAppender-->
+    <!--<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        &lt;!&ndash;展示格式 layout&ndash;&gt;
+        <encoder class="com.lvmama.flume.clients.logback.encoder.LvmamaLogeyeLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>-->
+
+    <appender name="Catalina" class="ch.qos.logback.core.FileAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator>
+                <expression>return message.contains("BIZEVENT");</expression>
+            </evaluator>
+            <OnMatch>DENY</OnMatch>
+        </filter>
+        <file>/opt/apache-tomcat-tnt-bms-pusher/logs/catalina.out</file>
+        <encoder class="com.lvmama.flume.clients.logback.encoder.LvmamaLogeyeLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="BizEvent" class="ch.qos.logback.core.FileAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator name="access">
+                <expression>return message.contains("NORMAL") || message.contains("BIZEVENT");</expression>
+            </evaluator>
+            <OnMismatch>DENY</OnMismatch>
+            <OnMatch>NEUTRAL</OnMatch>
+        </filter>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator name="deny">
+                <expression>return message.contains("CATALINA");</expression>
+            </evaluator>
+            <OnMatch>DENY</OnMatch>
+        </filter>
+        <file>/opt/apache-tomcat-tnt-bms-pusher/logs/bizEvent.log</file>
+        <encoder class="com.lvmama.flume.clients.logback.encoder.LvmamaLogeyeLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--指定最基础的日志输出级别-->
+    <root level="INFO">
+        <!--appender将会添加到这个logger-->
+        <!--<appender-ref ref="STDOUT"/>-->
+        <appender-ref ref="Catalina"/>
+        <appender-ref ref="BizEvent"/>
+    </root>
+
+</configuration>

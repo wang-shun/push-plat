@@ -1,0 +1,4 @@
+mysql=com.lvmama.bms.biz.logger.mysql.MysqlJobLoggerFactory
+mongo=com.lvmama.bms.biz.logger.mongo.MongoJobLoggerFactory
+es=com.lvmama.bms.biz.logger.es.EsJobLoggerFactory
+console=com.lvmama.bms.biz.logger.console.ConsoleJobLoggerFactory

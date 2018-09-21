@@ -1,0 +1,5 @@
+leveldb=com.lvmama.bms.core.failstore.leveldb.LeveldbFailStoreFactory
+berkeleydb=com.lvmama.bms.core.failstore.berkeleydb.BerkeleydbFailStoreFactory
+rocksdb=com.lvmama.bms.core.failstore.rocksdb.RocksdbFailStoreFactory
+mapdb=com.lvmama.bms.core.failstore.mapdb.MapdbFailStoreFactory
+ltsdb=com.lvmama.bms.core.failstore.ltsdb.LtsdbFailStoreFactory

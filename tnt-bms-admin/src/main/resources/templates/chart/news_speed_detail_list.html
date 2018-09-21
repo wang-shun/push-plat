@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>分销推送平台</title>
+
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+<link th:href="@{/css/style.css}" rel="stylesheet" />
+
+<link th:href="@{/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
+<link th:href="@{/css/plugins/footable/footable.core.css}" rel="stylesheet"/>
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+		<nav class="navbar-default navbar-static-side" role="navigation" th:include="nav :: navigation"></nav>
+		<div id="page-wrapper" class="gray-bg">
+        	<div class="border-bottom" th:include="header :: headerTop"></div>
+      		<div class="row wrapper border-bottom white-bg page-heading" th:fragment="headerNav">
+		   		<div class="col-lg-10">
+		     		<h2>消息推送进度</h2>
+		          	<ol class="breadcrumb">
+			            <li>
+			            	<a th:href="@{/main/dashboard}">首页</a>
+			            </li>
+			            <li>
+			            	<a>统计分析</a>
+			         	</li>
+			          	<li class="active">
+			             	<strong>消息进度列表</strong>
+			          	</li>
+					</ol>
+		      	</div>
+		      	<div class="col-lg-2">
+		      	</div>
+		  	</div>
+		  	
+        	<div class="wrapper wrapper-content animated fadeInRight">
+            	<div class="row">
+	            	<div class="col-lg-12">
+		            	<div class="ibox float-e-margins">
+		                    <div class="ibox-title">
+		                        <h5>搜索&amp;操作</h5>
+		                        <div class="ibox-tools">
+		                            <a class="collapse-link">
+		                                <i class="fa fa-chevron-up"></i>
+		                            </a>
+		                        </div>
+		                    </div>
+		                    <div class="ibox-content" style="display: block;">
+		                    	<form th:action="@{/chart/speed/detail}" method="post" id="searchForm">
+									<input type="hidden" name="msgTypeId" th:value="${msgTypeId}"/>
+									<input type="hidden" name="msgId" th:value="${msgId}"/>
+									<div class="col-sm-3 m-b-xs">
+										<input th:value="${distributorName}" name="distributorName" placeholder="分销商名称" class="form-control" type="text" />
+									</div>
+									<div class="row">
+										<div class="col-sm-2 m-b-xs">
+											<select id="status" name="status" th:value="status" class="form-control">
+												<option value="" th:selected="${status}">--请选择开启状态--</option>
+												<option value="0" th:selected="${status} == 0">未推送</option>
+												<option value="1" th:selected="${status} == 1">推送中</option>
+												<option value="2" th:selected="${status} == 2">推送成功</option>
+												<option value="3" th:selected="${status} == 3">推送失败</option>
+											</select>
+										</div>
+
+										<div class="col-sm-2 m-b-xs">
+											<button class="btn btn-primary btn-block" type="submit"><i class="fa fa-search"></i>&nbsp;&nbsp;&nbsp;&nbsp;<strong>搜索</strong></button>
+										</div>
+									</div>
+	                             </form>
+		                   </div>
+	                	</div>
+                	</div>
+                	<div class="col-lg-12">
+	                    <div class="ibox float-e-margins">
+	                        <div class="ibox-title">
+	                            <h5>消息进度列表</h5>
+								<a style="margin-left: 30px;" href="javascript:history.go(-1);" title="返回">
+									<i class="fa fa-mail-reply"></i>
+								</a>
+	                            <div class="ibox-tools">
+	                                <a class="collapse-link">
+	                                    <i class="fa fa-chevron-up"></i>
+	                                </a>
+	                            </div>
+	                        </div>
+	                        <div class="ibox-content">
+	                            <div class="table-responsive">
+	                                <table class=" table table-hover" data-page-size="10">
+	                                    <thead>
+		                                    <tr>
+		                                    	<th width="10%">消息ID</th>
+		                                        <!--<th width="18%">token</th>-->
+												<th width="10%">分销商名称</th>
+												<th width="10%">推送状态</th>
+												<!--<th width="10%">推送类型</th>-->
+												<th width="20%">推送地址</th>
+												<th width="15%">接收时间</th>
+												<th width="15%">发送时间</th>
+		                                        <!--<th width="20%">操作</th>-->
+		                                    </tr>
+	                                    </thead>
+	                                    <tbody>
+	                                    	<tr th:each="news : ${resultVo.result}">
+										   		<td th:text="${news.businessMsgID}">""</td>
+										      	<!--<td th:text="${news.token}">""</td>-->
+												<td th:text="${news.name}">""</td>
+												<td th:switch="${news.status}">
+													<span th:case="0">未推送</span>
+													<span th:case="1">推送中</span>
+													<span th:case="2">推送成功</span>
+													<span th:case="3">推送失败</span>
+												</td>
+												<!--<td th:switch="${news.pushType}">
+													<span th:case="1">HTTP</span>
+													<span th:case="2">TCP</span>
+													<span th:case="3">RPC</span>
+												</td>-->
+										      	<td th:text="${news.pushUrl}">""</td>
+												<td th:text="${#dates.format(news.receiveTime,'yyyy-MM-dd HH:mm:ss')}">""</td>
+												<td th:text="${#dates.format(news.pushTime,'yyyy-MM-dd HH:mm:ss')}">""</td>
+												<!--<td th:switch="${news.status}">-->
+													<!--<button th:case="0" onclick="pushNews(this);" th:name="${news.msgId}" class="btn-primary">推送</button>-->
+													<!--<button th:case="3" onclick="pushNews(this);" th:name="${news.msgId}" class="btn-primary" >重新推送</button>-->
+												<!--</td>-->
+											</tr>
+	                                    </tbody>
+	                                   	<tfoot>
+			                                <tr>
+			                                    <td id="pageHTML" colspan="7" th:inline="text">
+			                                    </td>
+			                                </tr>
+		                                </tfoot>
+	                                </table>
+			                	</div>
+	                        </div>
+	           			</div>
+                	</div>
+            	</div>
+        	</div>
+        	<div class="footer" th:include="footer :: copyright"></div>
+      	</div>
+	</div>
+	
+    <!-- Mainly scripts -->
+    <script th:src="@{/js/jquery-2.1.1.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+    <script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+	
+    <!-- Custom and plugin javascript -->
+    <script th:src="@{/js/inspinia.js}"></script>
+    <script th:src="@{/js/plugins/pace/pace.min.js}"></script>
+
+    <!-- common -->
+    <script th:src="@{/js/common.js}"></script>
+
+    <script th:inline="javascript">
+	    var pageHTML = [[${pageinationd}]];
+		$(document).ready(function () {
+			$("#pageHTML").html(pageHTML);
+		});
+
+		function pushNews(obj) {
+            var msgId = $(obj).attr("name");
+            bms.requestAjaxGet("push/"+msgId,
+                function(response){
+                    $(obj).parent().parent().parent().parent().remove();
+                    var totalCount = $("#totalCount").text();
+                    $("#totalCount").text(totalCount-1);
+                    swal({
+                        title: "移除成功！",
+                        text: "1秒后自动关闭。",
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                },function(response){
+                    sweetAlert(response.resMsg,"","error");
+                });
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lvmama.bms.scheduler.store.mysql.mapper.MessageMapper">
+	
+	<insert id="saveMessage" parameterType="com.lvmama.bms.scheduler.store.domain.po.MessagePO" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO `tnt_bms_msg_${msgTypeId}` (msg_type_id, msg_content, receive_time, msg_status, msg_id, max_retry)
+		VALUES (#{msgTypeId}, #{msgContent}, #{receiveTime}, #{msgStatus}, #{msgId}, #{maxRetry})
+	</insert>
+
+	<select id="updateMessage" parameterType="com.lvmama.bms.scheduler.store.domain.po.MessagePO" resultType="java.lang.String">
+		SET @updateKey:='';
+		UPDATE `tnt_bms_msg_${msgTypeId}`
+		SET id=(SELECT @updateKey:=id), msg_type_id=#{msgTypeId}, msg_content=#{msgContent}, msg_id=#{msgId}, max_retry=#{maxRetry}
+	  	where msg_id=#{msgId} and msg_type_id=#{msgTypeId} and msg_status=0;
+	  	SELECT @updateKey;
+	</select>
+
+	<insert id="saveMsgWithCheck" parameterType="com.lvmama.bms.scheduler.store.domain.po.MessagePO">
+		INSERT INTO `tnt_bms_msg_${msgTypeId}` (id, msg_type_id, msg_content, receive_time, msg_status, msg_id, max_retry)
+		SELECT '${id}', '${msgTypeId}', '${msgContent}', '${formatReceiveTime}', ${msgStatus}, '${msgId}', ${maxRetry}
+		WHERE NOT EXISTS (SELECT 1 FROM `tnt_bms_msg_${msgTypeId}` WHERE msg_id=#{msgId} and msg_type_id=#{msgTypeId} and msg_status=0)
+	</insert>
+
+	<select id="getMessage" resultType="com.lvmama.bms.scheduler.store.domain.po.MessagePO">
+		SELECT * FROM `tnt_bms_msg_${msgTypeId}`
+		WHERE id in
+		<foreach collection="msgIds" item="msgId" open="(" close=")" separator=",">
+			#{msgId}
+		</foreach>
+		AND msg_status = 1
+	</select>
+
+	<update id="batchUpdateStatus">
+		UPDATE `tnt_bms_msg_${msgTypeId}`
+		SET msg_status = #{targetStatus}
+		WHERE id in
+		<foreach collection="msgIds" item="msgId" open="(" close=")" separator=",">
+			#{msgId}
+		</foreach>
+		<if test="initialStatus != null">
+			AND msg_status = #{initialStatus}
+		</if>
+	</update>
+
+	<select id="updateStatus" resultType="java.lang.Long">
+		SET @updateKey:=NULL;
+		UPDATE `tnt_bms_msg_${msgTypeId}`
+		SET id=(SELECT @updateKey:=id), msg_status = #{targetStatus}
+		WHERE msg_id = #{msgId} AND msg_type_id = #{msgTypeId} AND msg_status = #{initialStatus};
+		SELECT @updateKey;
+	</select>
+	
+	<delete id="deleteExpiredMsg">
+		DELETE FROM `tnt_bms_msg_${msgTypeId}`
+		WHERE msg_status = 4 OR (msg_status = 1 AND NOT EXISTS
+			  (
+					SELECT 1 FROM tnt_bms_msg_token_${msgTypeId}
+					WHERE msg_id = tnt_bms_msg_${msgTypeId}.id
+			  )
+		)
+	</delete>
+
+	<delete id="deleteMessage">
+		DELETE FROM `tnt_bms_msg_${msgTypeId}`
+		WHERE WHERE msg_id = #{msgId} AND msg_type_id = #{msgTypeId} AND msg_status = #{status}
+	</delete>
+
+</mapper>

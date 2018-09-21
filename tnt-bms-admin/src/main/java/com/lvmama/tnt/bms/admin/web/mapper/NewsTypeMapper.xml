@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lvmama.tnt.bms.admin.web.mapper.NewsTypeMapper">
+
+    <resultMap id="BaseResultMap" type="com.lvmama.tnt.bms.admin.web.domain.po.NewsTypeDO">
+        <result column="id" property="id"/>
+        <result column="type" property="type"/>
+        <result column="priority" property="priority"/>
+        <result column="is_open" property="opened"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <sql id="param">
+        <if test="type != null and type != ''">
+          and `type` = #{type}
+        </if>
+        <if test="priority != null and priority != ''">
+            and priority = #{priority}
+        </if>
+        <if test="opened != null">
+            and is_open = #{opened}
+        </if>
+        <if test="version != null">
+            and version = #{version}
+        </if>
+    </sql>
+
+    <select id="dataVersion" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select version from tnt_bms_news_type where `type` = #{name}
+    </select>
+
+    <select id="findTypeListByParam" parameterType="java.util.Map" resultMap="BaseResultMap">
+        select id,`type`,priority,is_open,modify_time,create_time,version from tnt_bms_news_type
+        <if test="typeName != null and typeName != ''">
+            where `type` like concat('%',concat(typeName,'%'))
+        </if>
+        order by id
+    </select>
+
+    <select id="findTypeList" parameterType="java.util.Map" resultType="java.lang.String">
+        select `type` from tnt_bms_news_type
+        <if test="typeName != null and typeName != ''">
+            where `type` like concat('%',concat(typeName,'%'))
+        </if>
+        order by id
+    </select>
+
+    <select id="findByPage" resultMap="BaseResultMap">
+        select id,`type`,priority,is_open,modify_time,create_time,version from tnt_bms_news_type
+        <where>
+            <include refid="param"/>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="totalCount" resultType="java.lang.Long">
+        select count(*) from tnt_bms_news_type
+        <where>
+            <include refid="param"/>
+        </where>
+    </select>
+
+    <select id="findById" parameterType="java.lang.Long" resultType="com.lvmama.tnt.bms.admin.web.domain.po.NewsTypeDO">
+        select id,`type`,priority,is_open as opened,modify_time as modifyTime,create_time as createTime,version from tnt_bms_news_type where id = #{id}
+    </select>
+
+    <select id="findByType" parameterType="java.lang.String" resultType="com.lvmama.tnt.bms.admin.web.domain.po.NewsTypeDO">
+        select id,`type`,priority,is_open as opened,version from tnt_bms_news_type where `type` = #{type}
+    </select>
+
+    <delete id="delete" parameterType="java.lang.Long">
+        delete from tnt_bms_news_type where id = #{id}
+    </delete>
+
+    <delete id="deleteByName" parameterType="java.lang.Long">
+        delete from tnt_bms_news_type where `type` = #{type}
+    </delete>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsTypeDO">
+        insert into tnt_bms_news_type(`type`,priority,is_open,modify_time,create_time,version)
+        values(#{type},#{priority},#{opened},#{modifyTime},#{createTime},#{version})
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        insert into tnt_bms_news_type(`type`,priority,is_open,modify_time,create_time,version) values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.type},#{item.priority},#{item.opened},#{item.modifyTime},#{item.createTime},1)
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsTypeDO">
+        update tnt_bms_news_type
+        <set>
+            <if test="type != null and type != ''">
+                `type` = #{type},
+            </if>
+            <if test="priority != null and priority != ''">
+                priority = #{priority},
+            </if>
+            <if test="opened != null">
+                is_open = #{opened},
+            </if>
+            <if test="modifyTime != null">
+                modify_time = #{modifyTime},
+            </if>
+            <if test="version != null">
+                version = #{version}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="existTable" parameterType="String" resultType="String">
+        SELECT TABLE_NAME FROM
+            INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_SCHEMA='tnt_bms' AND TABLE_NAME = '${tableName}'
+    </select>
+
+    <update id="dropTable" parameterType="String">
+        drop table ${tableName}
+    </update>
+
+    <update id="createMsgTable" parameterType="String">
+        CREATE TABLE `${tableName}` (
+        `id`  int(20) NOT NULL AUTO_INCREMENT ,
+        `msg_type_id`  int(30) NULL DEFAULT NULL ,
+        `msg_content`  varchar(15000) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL ,
+        `receive_time`  datetime NULL DEFAULT NULL ,
+        `modify_time`  timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP ,
+        `msg_status`  tinyint(4) NULL DEFAULT NULL COMMENT '0：接受中 1：发送中 2：发送成功 3：发送失败 4：无效' ,
+        `msg_id`  varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '业务Id' ,
+        `max_retry`  smallint(255) NULL DEFAULT NULL ,
+        PRIMARY KEY (`id`),
+        INDEX `idx_msg_id` USING BTREE (`msg_id`)
+        )
+        ENGINE=InnoDB DEFAULT CHARACTER SET=utf8
+    </update>
+
+    <update id="createMsgTokenTable"  parameterType="String">
+        CREATE TABLE `${tableName}` (
+        `id`  bigint(20) NOT NULL AUTO_INCREMENT ,
+        `msg_id`  bigint(20) NULL DEFAULT NULL COMMENT '内部消息Id' ,
+        `token_id`  bigint(20) NULL DEFAULT NULL ,
+        `status`  tinyint(255) NULL DEFAULT NULL COMMENT '0：接受中 1：发送中 2：发送成功 3：发送失败 4：无效' ,
+        `modify_time`  timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP ,
+        `create_time`  datetime NULL DEFAULT NULL ,
+        `retry_time`  datetime NULL DEFAULT NULL ,
+        `retry_count`  smallint(11) NULL DEFAULT NULL ,
+        PRIMARY KEY (`id`),
+        INDEX `idx_status_createtime` USING BTREE (`status`, `create_time`),
+        INDEX `idx_tokenid_createtime` USING BTREE (`token_id`, `create_time`),
+        INDEX `idx_msgid` USING HASH (`msg_id`)
+        )
+        ENGINE=InnoDB DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci
+    </update>
+</mapper>

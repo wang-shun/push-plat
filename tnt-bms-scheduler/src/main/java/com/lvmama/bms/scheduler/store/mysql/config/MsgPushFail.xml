@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lvmama.bms.scheduler.store.mysql.mapper.MsgPushFailMapper">
+
+    <insert id="save" parameterType="com.lvmama.bms.scheduler.store.domain.po.MsgPushFailPO">
+          INSERT INTO tnt_bms_push_failure
+          (msg_id, msg_type_id, msg_type, msg_content, max_retry, token_id, token, receive_time, push_time)
+          VALUES
+          (#{msgId}, #{msgTypeId}, #{msgType}, #{msgContent}, #{maxRetry}, #{tokenId}, #{token}, #{receiveTime}, #{pushTime})
+    </insert>
+
+    <delete id="deleteExpiredMsg">
+        DELETE FROM tnt_bms_push_failure
+        WHERE push_time &lt;= #{deadline}
+    </delete>
+
+
+</mapper>

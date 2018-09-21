@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lvmama.tnt.bms.admin.web.mapper.ReceiverMonitorMapper">
+    <resultMap id="BaseResultMap" type="com.lvmama.tnt.bms.admin.web.domain.po.ReceiverMonitorDO">
+        <id column="id" property="id"/>
+        <result column="token" property="token"/>
+        <result column="name" property="name"/>
+        <result column="reach_count" property="reachCount"/>
+        <result column="receive_count" property="receiveCount"/>
+        <result column="fail_count" property="failCount"/>
+        <result column="send_count" property="sendCount"/>
+        <result column="timestamp" property="timestamp"/>
+    </resultMap>
+
+    <select id="countSendGroupByToken" resultMap="BaseResultMap">
+        SELECT
+            sum(s.reach_count) reach_count,
+            sum(s.receive_count) receive_count,
+            sum(s.fail_count) fail_count,
+            sum(s.send_count) send_count,
+            s.token,
+            a.`name`
+        FROM
+            tnt_bms_token_statistics s,
+            tnt_bms_news_access a
+        <where>
+            s.token = a.token
+            <if test="startTime != null">
+                and s.`timestamp`<![CDATA[ > ]]> #{startTime}
+            </if>
+            <if test="endTime != null">
+                and s.`timestamp` <![CDATA[ < ]]> #{endTime}
+            </if>
+        </where>
+        GROUP BY s.token
+    </select>
+
+    <select id="findByInterval" resultMap="BaseResultMap">
+        select
+            sum(reach_count) reach_count,
+            sum(receive_count) receive_count,
+            sum(fail_count) fail_count,
+            sum(send_count) send_count,
+            `timestamp`
+        from tnt_bms_token_statistics
+        <where>
+            <if test="token != null and token != ''">
+                and token = #{token}
+            </if>
+            <if test="startTime != null">
+                and `timestamp`<![CDATA[ > ]]> #{startTime}
+            </if>
+            <if test="endTime != null">
+                and `timestamp` <![CDATA[ < ]]> #{endTime}
+            </if>
+        </where>
+        GROUP BY `timestamp`
+    </select>
+
+    <select id="findByID" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select id,token,reach_count,receive_count,fail_count,send_count,`timestamp`
+        from tnt_bms_token_statistics where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.ReceiverMonitorDO">
+        insert into tnt_bms_token_statistics(token,reach_count,receive_count,fail_count,send_count,`timestamp`)
+        values(#{token},#{reachCount},#{receiveCount},#{failCount},#{sendCount},#{timestamp})
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into tnt_bms_token_statistics(token,reach_count,receive_count,fail_count,send_count,`timestamp`)
+        values
+        <foreach collection="list" open="(" close=")" item="monitorDO" separator="," >
+          #{monitorDO.token},#{monitorDO.reachCount},#{monitorDO.receiveCount},#{monitorDO.failCount},#{monitorDO.sendCount},#{monitorDO.timestamp}
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.ReceiverMonitorDO">
+        update tnt_bms_token_statistics
+        <set>
+            <if test="token != null and token != ''">
+                token = #{token},
+            </if>
+            <if test="reachCount != null ">
+                reach_count = #{reachCount},
+            </if>
+            <if test="receiveCount != null">
+                receive_count = #{receiveCount}
+            </if>
+            <if test="failCount != null">
+                fail_count = #{failCount}
+            </if>
+            <if test="sendCount != null">
+                send_count = #{sendCount}
+            </if>
+            <if test="timestamp != null">
+                `timestamp` = #{timestamp}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

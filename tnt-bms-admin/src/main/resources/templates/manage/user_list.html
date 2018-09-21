@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>分销推送平台</title>
+
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+
+    <link th:href="@{/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
+    <link th:href="@{/css/plugins/footable/footable.core.css}" rel="stylesheet"/>
+
+</head>
+
+<body>
+
+<div id="wrapper">
+    <nav class="navbar-default navbar-static-side" role="navigation" th:include="nav :: navigation"></nav>
+    <div id="page-wrapper" class="gray-bg">
+        <div class="border-bottom" th:include="header :: headerTop"></div>
+        <div class="row wrapper border-bottom white-bg page-heading" th:fragment="headerNav">
+            <div class="col-lg-10">
+                <h2>用户管理</h2>
+                <ol class="breadcrumb">
+                    <li>
+                        <a th:href="@{/main/dashboard}">首页</a>
+                    </li>
+                    <li>
+                        <a>系统设置</a>
+                    </li>
+                    <li class="active">
+                        <strong>用户管理</strong>
+                    </li>
+                </ol>
+            </div>
+            <div class="col-lg-2">
+            </div>
+        </div>
+
+        <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5>搜索&amp;操作</h5>
+                            <div class="ibox-tools">
+                                <a class="collapse-link">
+                                    <i class="fa fa-chevron-up"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="ibox-content" style="display: block;">
+                            <el-row>
+                                <el-form :inline="true" size="small" :model="searchForm" class="demo-form-inline">
+                                    <el-form-item label="用户名">
+                                    <el-input v-model="searchForm.userName" placeholder="用户名"></el-input>
+                                </el-form-item>
+                                    <el-form-item label="昵称">
+                                        <el-input v-model="searchForm.nickName" placeholder="昵称"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="有效状态">
+                                        <el-select v-model="searchForm.active" placeholder="有效状态">
+                                            <el-option label="--全部--" value=""></el-option>
+                                            <el-option label="有效" value="Y"></el-option>
+                                            <el-option label="无效" value="N"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item>
+                                        <el-button type="primary" icon="search" v-on:click="search" style="background-color: #18a689">查询</el-button>
+                                    </el-form-item>
+                                    <br/>
+                                    <el-form-item>
+                                        <el-button type="primary" icon="search" v-on:click="addUser" style="background-color: #18a689">新增用户</el-button>
+                                        <el-button type="primary" icon="search" v-on:click="distributeRole" style="background-color: #18a689">分配角色</el-button>
+                                    </el-form-item>
+                                </el-form>
+                            </el-row>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <!--列表-->
+                    <el-row>
+                        <el-table
+                                :data="tableData"
+                                border="true"
+                                style="width: 100%"
+                                v-on:selection-change="handleSelectionChange">
+                            <el-table-column
+                                    type="selection"
+                                    width="55">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="id"
+                                    label="ID"
+                                    width="120">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="userName"
+                                    label="用户名"
+                                    width="200">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="nickName"
+                                    label="昵称"
+                                    width="200">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="phone"
+                                    label="电话"
+                                    width="150">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="email"
+                                    label="邮箱"
+                                    width="150">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="active"
+                                    label="有效状态"
+                                    width="100">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="createTime"
+                                    label="创建时间"
+                                    width="160">
+                                <template slot-scope="scope">
+                                    {{scope.row.createTime | formatTime}}
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    prop="modifyTime"
+                                    label="修改时间"
+                                    width="160">
+                                <template slot-scope="scope">
+                                    {{scope.row.modifyTime | formatTime}}
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    label="操作">
+                                <template scope="scope">
+                                    <el-button :plain="true" type="success" size="small" icon="edit" v-on:click="editClick(scope.row)">修改</el-button>
+                                    <el-button :plain="true" type="success" size="small" icon="edit" v-on:click="resetPassword(scope.row)">重置密码</el-button>
+                                    <el-button :plain="true" type="danger" size="small" icon="delete" v-on:click="deleteClick(scope.row)">删除</el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-row>
+                    <!--列表底部工具条和分页符-->
+                    <el-row style="margin-top: 20px" type="flex" justify="end">
+                        <el-col :span="18" >
+                            <el-pagination
+                                    v-on:size-change="pageSizeChange"
+                                    v-on:current-change="currentPageChange"
+                                    :current-page="currentPage"
+                                    :page-sizes="[10, 20, 30, 50]"
+                                    :page-size="pageSize"
+                                    layout="total, sizes, prev, pager, next, jumper"
+                                    :total="totalCount">
+                            </el-pagination>
+                        </el-col>
+                    </el-row>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <el-dialog
+                    :title="title"
+                    :visible.sync="dialogVisible"
+                    width="30%"
+                    center="true">
+                <el-form label-width="80px" :model="userPO" :rules="rules" ref="userPO" size="small">
+                    <el-form-item label="用户名" prop="userName">
+                        <el-input v-model="userPO.userName" auto-complete="off" :disabled="formColumnDisable"></el-input>
+                    </el-form-item>
+                    <el-form-item label="昵称" prop="nickName">
+                        <el-input v-model="userPO.nickName" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱" prop="email">
+                        <el-input v-model="userPO.email" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="电话" prop="phone">
+                        <el-input v-model="userPO.phone" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="备注">
+                        <el-input type="textarea" v-model="userPO.notes" auto-complete="off"></el-input>
+                    </el-form-item>
+                </el-form>
+                <span slot="footer" class="dialog-footer">
+                <el-button v-on:click="dialogVisible = false">取 消</el-button>
+                <el-button type="primary" v-on:click="saveOrUpdate">保 存</el-button>
+              </span>
+            </el-dialog>
+        </div>
+
+        <div>
+            <el-dialog
+                    title="分配角色"
+                    :visible.sync="roleDialogVisible"
+                    v-on:close="roleDialogVisible = false"
+                    center="true"
+                    style="height: 900px;width: 60%">
+                <template>
+                    <el-transfer
+                            filterable="true"
+                            :titles="['未分配角色', '已分配角色']"
+                            v-model="userRoles"
+                            :data="roleStore">
+                    </el-transfer>
+                </template>
+                <span slot="footer" class="dialog-footer">
+                <el-button v-on:click="roleDialogVisible = false">取 消</el-button>
+                <el-button type="primary" v-on:click="handleRoleSubmit">确 定</el-button>
+              </span>
+            </el-dialog>
+        </div>
+
+        <div class="footer" th:include="footer :: copyright"></div>
+    </div>
+</div>
+
+<!-- Mainly scripts -->
+<script th:src="@{/js/jquery-2.1.1.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+<script th:src="@{/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+
+<!-- Custom and plugin javascript -->
+<script th:src="@{/js/inspinia.js}"></script>
+<script th:src="@{/js/plugins/pace/pace.min.js}"></script>
+<script th:src="@{/js/plugins/vue/vue.min.js}"></script>
+<script th:src="@{/js/plugins/axios/axios.min.js}"></script>
+<script th:src="@{/js/plugins/elementui/index.js}"></script>
+<link th:href="@{/css/plugins/elementui/index.css}" rel="stylesheet" type="text/css" />
+
+<!-- common -->
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/bms-util.js}"></script>
+<script th:src="@{/js/tool/index.js}"></script>
+
+<script th:inline="javascript">
+
+    var vue = new Vue({
+        el: "#wrapper",
+        data: {
+            totalCount: 0,
+            currentPage: 0,
+            pageSize: 10,
+            tableData: null,
+            searchForm:{
+                userName:'',
+                nickName:'',
+                active:'Y'
+            },
+            dialogVisible: false,
+            userPO:{
+                id:null,
+                userName:'',
+                password:'',
+                salt:'',
+                nickName:'',
+                phone:'',
+                email:'',
+                notes:'',
+                active:'',
+                createTime:null,
+                modifyTime:null
+            },
+            rules: {
+                userName: [{
+                    required: true, message: '请输入用户名', trigger: 'blur'
+                }],
+                mobileNo:[{
+                    required: false, message: '请输入手机号', trigger: 'blur'
+                },{
+                    validator:function(rule,value,callback){
+                        /*if(!this.$tools.isMobileNo(value)){
+                         callback(new Error("请输入手机号"));
+                         }else{
+                         callback();
+                         }*/
+                    }
+                }],
+            },
+            multipleSelection: [],
+            title: '',
+            formColumnDisable: false,
+            roleDialogVisible: false,
+            userRoles:[],
+            roleStore:[],
+
+        },
+        methods: {
+            handleRoleSubmit:function () {
+                var self = this;
+                var url = "/tnt-bms-admin/manage/user/distributeRole";
+                var userId = this.multipleSelection[0].id;
+                axios.post(url, {id:userId,roleIds:this.userRoles}).then(function(response){
+                    self.roleDialogVisible = false;
+                }).catch(function(fail){
+                    self.$message.error(fail.message);
+                });
+            },
+            distributeRole:function () {
+                var self = this;
+                if (self.multipleSelection.length > 1) {
+                    self.$message({message:"只能选择其中一条数据进行分配角色",type: 'warning'});
+                    return;
+                }
+                var userId = this.multipleSelection[0].id;
+                var url = "/tnt-bms-admin/manage/user/findRoles";
+                axios.get(url, {params: {userId: userId}}).then(function (response) {
+                    var roles = response.data.result.roles;
+                    var store = [];
+                    for(var index in roles){
+                        store.push({
+                            label: roles[index].roleName,
+                            code: roles[index].roleCode,
+                            key: roles[index].id,
+                        });
+                    };
+                    self.roleStore = store;
+                    self.userRoles = response.data.result.userRoles;
+                    self.roleDialogVisible = true;
+                }).catch(function (fail){
+                    self.$message.error(fail.message);
+                });
+            },
+            saveOrUpdate: function () {
+                var self = this;
+                var url = "/tnt-bms-admin/manage/user/saveOrUpdate";
+                axios.post(url, this.userPO).then(function (response) {
+                    if (response.data.success) {
+                        self.$message.info(response.data.resMsg)
+                    } else {
+                        self.$message.error(response.data.resMsg);
+                    }
+                    self.dialogVisible = false;
+                    self.search();
+                }).catch(function (fail) {
+                    self.$message.error(fail.data.resMsg)
+                })
+            },
+            addUser: function () {
+                this.clearUser();
+                this.dialogVisible = true;
+                this.title = '新增用户';
+                this.formColumnDisable = false;
+            },
+            editClick: function (row) {
+                var id = row.id;
+                var self = this;
+                var url = "/tnt-bms-admin/manage/user/findById";
+                axios.get(url,{
+                    params: {
+                        userId: id
+                    }
+                }).then(function (response) {
+                    if (response.data.success) {
+                        self.userPO = response.data.result;
+                        self.dialogVisible = true;
+                        self.formColumnDisable = true;
+                        self.title = '修改用户';
+                    } else {
+                        self.$message.error(response.data.resMsg);
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            resetPassword:function (row) {
+                var self = this;
+                var url = "/tnt-bms-admin/manage/user/resetPassword";
+                self.$confirm('确认重置密码, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.get(url, {params:{userId: row.id}}).then(function (response) {
+                        self.$message({
+                            type: 'success',
+                            message: '重置成功!'
+                        });
+                        self.search();
+                    }).catch(function(fail) {
+                        self.$message.error(fail.resMsg);
+                    })
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            deleteClick: function (row) {
+                var self = this;
+                var url = "/tnt-bms-admin/manage/user/deleteById";
+                self.$confirm('确认删除数据, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.get(url, {params:{userId: row.id}}).then(function (response) {
+                        self.$message({
+                            type: 'success',
+                            message: '删除成功!'
+                        });
+                        self.search();
+                    }).catch(function(fail) {
+                        self.$message.error(fail.resMsg);
+                    })
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            clearUser: function () {
+                this.userPO.id = null;
+                this.userPO.userName = '';
+                this.userPO.password = '';
+                this.userPO.salt = '';
+                this.userPO.nickName = '';
+                this.userPO.phone = '';
+                this.userPO.email = '';
+                this.userPO.active = '';
+                this.userPO.createTime = null;
+                this.userPO.modifyTime = null;
+            },
+            search : function () {
+                var self = this;
+                var url = "/tnt-bms-admin/manage/user/list";
+                var requestData = {
+                    request: this.searchForm,
+                    pageNo: this.currentPage,
+                    pageSize: this.pageSize
+                }
+                axios.post(url, requestData).then(function (response) {
+                    if (response.data.success) {
+                        self.tableData = response.data.result;
+                        self.totalCount = response.data.totalCount;
+                    } else {
+                        self.totalCount = 0;
+                        self.$message.error(response.data.resMsg);
+                    }
+                }).catch(function (error) {
+                    self.totalCount = 0;
+                    console.log(error);
+                });
+            },
+            handleSelectionChange: function (val) {
+                this.multipleSelection = val;
+            },
+            //分页大小修改事件
+            pageSizeChange:function(val) {
+                this.pageSize = val;
+                var _self = this;
+                _self.search();//重新加载数据
+            },
+            //当前页修改事件
+            currentPageChange:function(val) {
+                this.currentPage = val;
+                var _self = this;
+                _self.search();//重新加载数据
+            },
+        },
+        filters:{
+            formatTime: function (cellValue) {
+                return new Date(cellValue).Format("yyyy-MM-dd hh:mm:ss");
+            },
+        },
+        mounted: function () {
+        }
+    });
+</script>
+
+</body>
+
+</html>

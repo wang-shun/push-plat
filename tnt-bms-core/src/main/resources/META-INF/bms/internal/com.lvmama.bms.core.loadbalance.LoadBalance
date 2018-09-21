@@ -1,0 +1,3 @@
+random=com.lvmama.bms.core.loadbalance.RandomLoadBalance
+consistenthash=com.lvmama.bms.core.loadbalance.ConsistentHashLoadBalance
+mastersalve=com.lvmama.bms.core.loadbalance.MasterSalveLoadBalance

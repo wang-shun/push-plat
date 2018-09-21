@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lvmama.tnt.bms.admin.web.mapper.NewsTypeStatisticsMapper">
+    <resultMap id="BaseResultMap" type="com.lvmama.tnt.bms.admin.web.domain.po.NewsTypeStatisticsDO">
+        <id column="id" property="id"/>
+        <result column="msg_type_id" property="msgType"/>
+        <result column="reach_count" property="reachCount"/>
+        <result column="receive_count" property="receiveCount"/>
+        <result column="fail_count" property="failCount"/>
+        <result column="send_count" property="sendCount"/>
+        <result column="timestamp" property="timestamp"/>
+    </resultMap>
+
+    <sql id="all_column">
+        id,msg_type_id,reach_count,receive_count,fail_count,send_count,`timestamp`
+    </sql>
+
+    <select id="findNewsTypeStatis" resultMap="BaseResultMap">
+        select
+            sum(reach_count) reach_count,
+            sum(receive_count) receive_count,
+            sum(fail_count) fail_count,
+            sum(send_count) send_count,
+            `timestamp`
+        from tnt_bms_news_type_statistics
+        <where>
+            <if test="msgTypeID != null and msgTypeID != ''">
+                and msg_type_id = #{msgTypeID}
+            </if>
+            <if test="startTime != null">
+                and `timestamp` <![CDATA[ > ]]> #{startTime}
+            </if>
+            <if test="endTime != null">
+                and `timestamp` <![CDATA[ < ]]> #{endTime}
+            </if>
+        </where>
+        group by `timestamp`
+    </select>
+
+    <insert id="insert" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsTypeStatisticsDO">
+        insert into tnt_bms_news_type_statistics(msg_type_id,reach_count,receive_count,fail_count,send_count,`timestamp`)
+        values(#{msgType},#{reachCount},#{receiveCount},#{failCount},#{sendCount},#{timestamp})
+    </insert>
+
+    <update id="update" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.NewsTypeStatisticsDO">
+        update tnt_bms_news_type_statistics
+        <set>
+            <if test="msgType != null">
+                msg_type_id = #{msgType},
+            </if>
+            <if test="reachCount != null">
+                reach_count = #{reachCount},
+            </if>
+            <if test="receiveCount != null">
+                receive_count = #{receiveCount},
+            </if>
+            <if test="failCount != null">
+                fail_count = #{failCount},
+            </if>
+            <if test="sendCount != null">
+                send_count = #{sendCount},
+            </if>
+            <if test="timestamp != null">
+                `timestamp` = #{timestamp},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Long">
+        delete from tnt_bms_news_type_statistics where id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lvmama.tnt.bms.admin.web.mapper.PusherManagerMapper">
+
+    <resultMap id="BaseResultMap" type="com.lvmama.tnt.bms.admin.web.domain.po.MsgPusherDO">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="file_name" property="fileName"/>
+        <result column="jar" property="jar"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <select id="dataVersion" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select version from tnt_bms_msg_pusher where `name` = #{name}
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap">
+        select
+        id,
+        `name`,
+        file_name,
+        <if test="include != null">
+            jar,
+        </if>
+        version
+        from tnt_bms_msg_pusher where id = #{id}
+    </select>
+
+    <select id="totalCount" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.MsgPusherDO" resultType="java.lang.Long">
+        select count(*) from tnt_bms_msg_pusher
+        <where>
+            <if test="name != null and name != ''">
+                and `name` like concat('%',concat(#{name},'%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="findByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select id,
+        `name`,
+        file_name,
+        <if test="include != null">
+            jar,
+        </if>
+        version
+        from tnt_bms_msg_pusher
+       where `name` like concat('%',concat(#{name},'%'))
+        order by id desc
+    </select>
+
+   <select id="findPushersByPage" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.MsgPusherDO" resultMap="BaseResultMap">
+       select id,`name`,file_name,version from tnt_bms_msg_pusher
+       <where>
+           <if test="name != null and name != ''">
+               and `name` like concat('%',concat(#{name},'%'))
+           </if>
+       </where>
+       order by id desc
+   </select>
+
+    <select id="findPushers" resultMap="BaseResultMap">
+        select id,`name`,file_name from tnt_bms_msg_pusher order by id desc
+    </select>
+
+    <select id="existName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(*) from tnt_bms_msg_pusher where `name` = #{name}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.MsgPusherDO">
+        insert into tnt_bms_msg_pusher(`name`,file_name,jar,version)
+        values(#{name},#{fileName},#{jar,typeHandler=org.apache.ibatis.type.BlobTypeHandler},#{version})
+    </insert>
+
+    <update id="update" parameterType="com.lvmama.tnt.bms.admin.web.domain.po.MsgPusherDO">
+        update tnt_bms_msg_pusher
+        <set>
+            <if test="name != null and name != ''">
+                `name` = #{name},
+            </if>
+            <if test="fileName != null and fileName != ''">
+                file_name = #{fileName},
+            </if>
+            <if test="version != null">
+                version = #{version},
+            </if>
+            <if test="jar != null">
+                jar = #{jar,typeHandler=org.apache.ibatis.type.BlobTypeHandler},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Integer">
+        delete from tnt_bms_msg_pusher where id = #{id}
+    </delete>
+
+    <delete id="deleteByName" parameterType="java.lang.String">
+        delete from tnt_bms_msg_pusher where `name` = #{name}
+    </delete>
+</mapper>
